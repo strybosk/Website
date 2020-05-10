@@ -14,7 +14,7 @@ R.options=list(max.print=100))
 
 ## Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties
 
-## Introductions
+## Introductions Blah
 
 *The two datasets that were chosen for this project center around health across counties in Texas. The "health" dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website funded by the Robert Wood Johnson Foundation Program.*
 
