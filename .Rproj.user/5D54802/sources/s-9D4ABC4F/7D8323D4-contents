@@ -1,0 +1,304 @@
+---
+title: "Project 2"
+author: "Kathleen Strybos"
+date: "2020-04-20"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include=FALSE}
+#LEAVE THIS CHUNK ALONE!
+library(knitr)
+opts_chunk$set(fig.align="center", fig.height=5, message=FALSE, warning=FALSE, fig.width=8, tidy.opts=list(width.cutoff=60),tidy=TRUE)
+
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,tidy=TRUE, tidy.opts=list(width.cutoff=60),
+R.options=list(max.print=100))
+```
+###Project 2: Modeling, Testing and Predicting on Data for Food Insecurity in Texas Counties
+
+
+#Introduction
+
+*The dataset that was chosen for this project is centered around health across counties in Texas. The dataset contains 12 different variables for different health measures across counties in Texas. A few of these variables include average life expectancy, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, average household incomes, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website and funded by the Robert Wood Johnson Foundation Program. Overall there are 254 observations, to signify how many counties there are in Texas.*
+
+#MANOVA
+
+```{R}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(lmtest)
+library(sandwich)
+library(plotROC)
+joindata<-read_csv("joindata.csv")
+
+#MANOVA
+
+man1<-manova(cbind(lifeexpectancy,foodinsecurerate, diabeticrate,limitedaccessfoodrate, 
+  Household.Income, free_reduced_lunch_percent,
+  costpermeal)~urbanization, data=joindata)
+summary(man1)
+
+#Homogeneity of Variances
+
+covmats<-joindata%>%group_by(urbanization)%>%drop_na()%>%do(covs=cov(.[2:8]))
+for(i in 1:3){print(as.character(covmats$urbanization[i])); print(covmats$covs[i])}
+
+#Multivariate Normality
+nrow(filter(joindata, urbanization=="Rural"))
+nrow(filter(joindata, urbanization=="Urban"))
+
+
+#ANOVA
+summary.aov(man1)
+
+#Probability of at least one Type 1 Error
+type1overall<-1-(1-0.05)^8
+type1overall
+#Bonferroni Correction
+bonferroni<-0.05/8
+bonferroni
+
+```
+
+*There is a significant effect, with a p-value of 2.2e-16, in urbanization when the MANOVA is performed, meaning there is a mean difference across urbanization status for one or some of the numeric response variables. However, we cannot decipher which variable is showing a mean difference with a MANOVA, so univariate ANOVAs were used to narrow this down. The assumptions for MANOVA that were likely met include the assumption for multivariate normality because there were 172 samples for Rural counties taken and 82 samples for Urban counties that were taken, which is more than 25 in each category. Homogeneity of covariances does not appear to be met because the covariances between urban and rural counties differ largely in a few areas, with some univariate and multivariate outliers, but this might be passable for the MANOVA, as the assumptions are difficult to meet.*
+
+*Univariate ANOVAs were performed to find responses showing a mean difference across groups, and life expectancy (p-value of 0.003873), diabetic rate (p-value of 0.001511), household income (p-value of 2.2e-16) and free and reduced lunch percent (p-value of 0.000000004248) all showed significance, meaning that the mean differences by urbanization status differed. For an ANOVA, we can assume that the assumptions of random sampling, normal distribution of the groups and equal variance of each group have been met, as the sample sizes contain independent responses for every county in Texas, and each variable contains more than 25 samples within each group.*
+
+
+*There was one MANOVA performed, and seven ANOVAs so overall 8 tests were performed.The probability that I made at least one Type-1 error is 0.3365796. The boneferroni adjusted significance level that I will use to keep the overall type I error rate at .05 is 0.00625. All four previously significant tests showed a significant difference even after Bonferroni adjustment for life expectancy, diabetic rate, household income, and free/reduced lunch percentage, as their p-values were much smaller than even the Bonferroni adjusted p-value. No Post-Hoc tests were done because there were only two categories within "urbanization," so it was visible after doing ANOVAs where the differences were between groups.*
+
+
+## Randomization Test
+
+```{R}
+#Mean Difference in Cost Per Meal
+joindata%>%group_by(urbanization)%>%
+  summarize(means=mean(costpermeal))%>%summarize(`mean_diff:`=diff(means))
+#Permutations
+set.seed(1234)
+rand_dist<-vector()
+for(i in 1:5000){
+new<-data.frame(costpermeal=sample(joindata$costpermeal),
+  urbanization=joindata$urbanization)
+rand_dist[i]<-mean(new[new$urbanization=="Urban",]$costpermeal)-
+  mean(new[new$urbanization=="Rural",]$costpermeal)}
+mean(rand_dist>0.04713556| rand_dist< -0.04713556)
+#Histogram of the Null Distribution and Test Statistic
+{hist(rand_dist,main="", ylab = "Count (n)",); abline(v=-0.04713556,  col="red"); 
+  abline(v=0.04713556,  col="red")}
+#Comparison to t-test
+t.test(data=joindata, costpermeal~urbanization)
+```
+
+*The null hypothesis of this randomization test is that the mean cost per meal is the same for urban and rural counties. The alternative hypothesis is that the mean cost per meal is not the same for urban and rural counties. The two tailed p-value of the randomization test came out to be 0.0754, which is not significant in comparison to a reference of 0.05. Moreover, when a Two Sample t-test was done, the p-value was 0.07205, which is also not significant, indicating that the randomization test achieved similar results. We can then fail to reject the null hypothesis that the mean cost per meal is the same for urban and rural counties, due to a large p-value. The plot of the null distribution shows the red line at the positive and negative test statistics, which was 0.04713556. *
+
+#Linear Regression
+```{R}
+#Linear Regression Model
+joindata$foodinsecurerate_c<-joindata$foodinsecurerate-mean(joindata$foodinsecurerate, 
+  na.rm=T)
+joindata$costpermeal_c<-joindata$costpermeal-mean(joindata$costpermeal, na.rm=T)
+fit<-lm(foodinsecurerate_c ~ costpermeal_c * border_status, data=joindata)
+summary(fit)
+
+#Regression Plot
+fit%>%ggplot(aes(costpermeal_c, foodinsecurerate_c, color=border_status))+geom_point()+
+  geom_smooth(method="lm")+
+  ggtitle("Regression of Food Insecurity Rate by Cost Per Meal")
+
+#Normality Assumption: Data is Normal
+resids<-lm(foodinsecurerate_c~costpermeal_c*border_status, data=joindata)$residuals
+ggplot()+geom_histogram(aes(resids),bins=10)+
+  ggtitle("Histogram of Residuals")
+ggplot()+geom_qq(aes(sample=resids))+geom_qq()+
+  ggtitle("QQ Plot")
+shapiro.test(resids)
+
+#Linearity Assumption
+fitted<-lm(foodinsecurerate_c~costpermeal_c*border_status, data=joindata)$fitted.values
+ggplot()+geom_point(aes(resids,fitted))+
+  ggtitle("Residuals vs. Fitted Values")
+
+#Homoskedasticity
+bptest(fit) #Fail to reject the null hypothesis that data is homoskedastic
+
+#Robust Standard Errors: Redo Regression
+coeftest(fit, vcov = vcovHC(fit))
+
+#Proportion of the Variation Explained
+summary(fit)$r.sq
+
+
+```
+
+*Predicted food insecurity rate for an average cost per meal at a border county is 4.9538 percent below the centered mean of the food insecurity rate. Controlling for border status, for every one dollar increase in the centered cost per meal, the food insecurity rate decreases by 0.16166 percent. At an average cost per meal, non-border counties have a 5.76048 percent higher food insecurity rate as compared to border counties. The slope for cost per meal on food insecurity rate is 2.57129 units lower for non-border counties compared to border counties.*
+
+*The data meets the assumption of normality and homoskedasticity, and therefore linearity is also met through homoskedasticity. A Shapiro_Wilk Normality test was run, along with a histogram and QQ plot to check for normality, and all results confirmed normality of the data. The null hypothesis for homoskedasticity fails to be rejected after running the Breusch-Pagan test, with a p-value of 0.1483, which is greater than 0.05.*
+
+*After redoing the regression using homoskedastic standard errors, significance was maintained for the effect of border status when the cost per meal is controlled for. The standard errors for border status decreased by about two-tenths from 0.8991 to 0.68115, and the standard error for cost per meal decreased from 2.3624 to 1.70938. The standard error for the interaction between border status and cost per meal decreased slightly from 2.8136 to 2.17218 with robust standard errors.*
+
+*The proportion of the variation in the outcome that the model explains, or the R-squared value, is 0.2246, or 22.46%.*
+
+
+#Linear Regression with Bootstrapped Standard Errors
+
+```{R}
+fit<-lm(foodinsecurerate_c ~ costpermeal_c*border_status, data=joindata)
+summary(fit)
+#Bootstrapping
+set.seed(1234)
+samp_distn<-replicate(5000, {
+boot_dat <- sample_frac(joindata, replace=T) 
+fit <- lm(foodinsecurerate_c ~ costpermeal_c*border_status, data=boot_dat)
+coef(fit)
+})
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+
+```
+
+*The bootstrapped standard errors shows similar standard errors that were seen in the robust standard errors of the linear regression, however they are very different than the original standard errors from the linear regression. The bootstrapped SE for costpermeal_c is 1.673076, which is similar to the robust SE of 1.70938, but different from the original SE of 2.3624. Because the bootstrapped and robust SEs went down, this means the p-values got smaller as well. The bootstrapped SE for border status is 0.6910803, which is similar to the robust SE of 0.68115, and smaller than the original SE of 0.8991, meaning the p-value is smaller for the adjusted SEs. The bootstrapped SE for the interaction is 2.158202, which is similar to the robust SE of 2.17218, but smaller than the original SE of 2.8136, meaning the p-value is smaller for the adjusted SEs too.*
+
+#Logistic Regression
+```{R}
+#Logistic Regression
+joindata_log<- joindata%>%mutate(Urb_binary=ifelse(urbanization=="Urban",1,0))
+fit<-glm(Urb_binary ~ limitedaccessfoodrate+Household.Income, data=joindata_log,
+  family=binomial(link="logit"))
+coeftest(fit)
+exp(coef(fit))
+```
+
+```{R}
+#Confusion Matrix
+join_conf<-joindata_log%>%drop_na(limitedaccessfoodrate)%>%mutate(prob=predict(fit, 
+  type="response"), 
+  prediction=ifelse(prob>0.5,1,0))
+classify<-join_conf%>%transmute(prob,prediction,truth=Urb_binary)
+classify
+table(prediction= classify$prediction, truth=classify$truth)%>%addmargins()
+
+#Accuracy
+(154+34)/253
+#Sensitivity (TPR)
+34/82
+#Specificity (FPR)
+154/171
+#Precision (PPV)
+34/51
+```
+
+```{R}
+#Density Plot of Log-Odds
+join_conf$logit<-predict(fit,type="link")
+join_conf%>%ggplot()+geom_density(aes(logit,color=urbanization,fill=urbanization), 
+  alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab("predictor (logit)")+
+  geom_rug(aes(logit,color=urbanization)) + ggtitle("Density Plot of Log-Odds") 
+
+#ROC Plot
+library(plotROC)
+ROCplot<-ggplot(classify)+geom_roc(aes(d=truth,m=prob), n.cuts=0)+geom_segment(aes(x=0,
+  xend=1, y=0, yend=1), lty=2)+ggtitle("ROC Curve")
+ROCplot
+
+#AUC Calculation
+calc_auc(ROCplot)
+```
+
+```{R}
+#10-Fold CV
+set.seed(1234)
+k=10
+
+data1<-joindata_log[sample(nrow(joindata_log)),] 
+folds<-cut(seq(1:nrow(joindata_log)),breaks=k,labels=F) 
+
+diags<-NULL
+for(i in 1:k){          
+  train<-data1[folds!=i,] 
+  test<-data1[folds==i,]  
+  
+  truth<-test$Urb_binary
+  
+  log_reg<- glm(Urb_binary ~ limitedaccessfoodrate+Household.Income,
+                data=train, 
+                family="binomial")
+  probs<- predict(log_reg, type = "response", newdata=test)
+  
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+summarize_all(diags,mean,na.rm=TRUE)
+
+```
+*The odds of urbanization with a limited food access rate of zero and a household income of zero is 0.002087343. Controlling for household income, for every one additional unit increase in the rate of limited access to food, the odds of urbanization decrease by a factor of 0.993745502, but this does not have a significant negative impact. Controlling for limited access to food rate, household income has a significant positive impact on the odds of urbanization. Controlling for limited access to food rate, for every one additional unit of household income,the odds of urbanization increase by a factor of 1.000109233.*
+
+*The accuracy of the model was reported to be 0.743083, which means that true results of classification, either positive or negative are reported 74.31% of the time for the classification of a county as urban or rural. The sensitivity was reported to be 0.4146341, which means that the true positive rate of counties being identified as urban happened 41.46% of the time. The specificity was reported to be 0.9005848, meaning that the true negative rate of counties being identified as rural happened 90.06% of the time. The precision of the model was 0.6666667, meaning that this is the proportion of counties classified as urban that actually are urban in reality.*
+
+*The ROC curve above shows the tradeoff between sensitivity and specificity, and the AUC is a reflection of the summarization of those values. We can see that as the true positive rate increases, the false positive rate increases as well. The calculation of the AUC from the ROC plot gave a value of 0.7925403, which falls within the "fair" range for how well the model of the rate of limited access to food and household income predicts the data of urbanization classification.*
+
+*A 10-fold cross validation was done, and the average out-of-sample accuracy was reported to be 0.7274744, which means that true results, either positive or negative are reported 72.75% of the time for the classification of a county as urban or rural. The sensitivity was reported to be 0.4075536, which means that the true positive rate of counties being identified as urban happened only 40.76% of the time. The specificty was reported to be 0.8796805, which means that correct identification of rural counties happened 87.97% of the time. The PPV was reported to be 0.6665476, meaning that this is the proportion of counties classified as urban that actually are urban in reality. The AUC of the model is 0.7722236, which falls in the classification of "fair" for how well the model predicts the data.*
+
+#LASSO and CV
+
+```{R}
+library(glmnet)
+joindata_nona<-joindata_log%>%drop_na()%>%select(-c(County, 
+  foodinsecurerate_c, costpermeal_c, urbanization))
+y<-as.matrix(joindata_nona$Urb_binary)
+x<-model.matrix(Urb_binary~.,data=joindata_nona)[,-1]
+head(x)
+cv<-cv.glmnet(x,y, family="binomial")
+lasso<-glmnet(x,y,lambda=cv$lambda.1se)
+coef(lasso)
+
+#10-fold CV
+set.seed(1234)
+k=10
+data <- joindata_nona %>% sample_frac
+folds <- ntile(1:nrow(data),n=10)
+diags<-NULL
+for(i in 1:k){
+train <- data[folds!=i,]
+test <- data[folds==i,] 
+truth <- test$Urb_binary
+fit <- glm(Urb_binary~uninsuredchildrenrate+Household.Income,data=train,
+           family="binomial")
+probs <- predict(fit, newdata=test, type="response")
+diags<-rbind(diags,class_diag(probs,truth))
+}
+diags%>%summarize_all(mean)
+```
+*The LASSO regression retained Household Income and Rate of Uninsured Children as the variables that were the best predictors for Urban classification. The 10-fold CV performed on the binary Urban classification variable gave an out-of-sample accuracy of 0.8269928, which is greater than the out-of-sample accuracy in the logisitic regression, which was 0.7274744. The AUC from the 10-fold CV for the LASSO was 0.874748 which is really good, as opposed to an AUC of 0.7722236 for the logistic regression, which is fair. This means that the LASSO regression performs better than a logisitic regression at predicting true results, either positive or negative for the classification of a county as urban or rural, by reducing overfitting of the model.*
+
+

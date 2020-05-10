@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Kathleen Strybos" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project 2</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project2.knit/">Project 2</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              <p>###Project 2: Modeling, Testing and Predicting on Data for Food Insecurity in Texas Counties</p>
+<p>#Introduction</p>
+<p><em>The dataset that was chosen for this project is centered around health across counties in Texas. The dataset contains 12 different variables for different health measures across counties in Texas. A few of these variables include average life expectancy, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, average household incomes, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website and funded by the Robert Wood Johnson Foundation Program. Overall there are 254 observations, to signify how many counties there are in Texas.</em></p>
+<p>#MANOVA</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(tidyverse)
+<span style="color:#a6e22e">library</span>(dplyr)
+<span style="color:#a6e22e">library</span>(ggplot2)
+<span style="color:#a6e22e">library</span>(lmtest)
+<span style="color:#a6e22e">library</span>(sandwich)
+<span style="color:#a6e22e">library</span>(plotROC)
+joindata<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">read_csv</span>(<span style="color:#e6db74">&#34;joindata.csv&#34;</span>)
+
+<span style="color:#75715e">#MANOVA</span>
+
+man1<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">manova</span>(<span style="color:#a6e22e">cbind</span>(lifeexpectancy,foodinsecurerate, diabeticrate,limitedaccessfoodrate, 
+  Household.Income, free_reduced_lunch_percent,
+  costpermeal)<span style="color:#f92672">~</span>urbanization, data<span style="color:#f92672">=</span>joindata)
+<span style="color:#a6e22e">summary</span>(man1)
+</code></pre></div><pre><code>##               Df  Pillai approx F num Df den Df    Pr(&gt;F)    
+## urbanization   1 0.32767   15.874      7    228 &lt; 2.2e-16 ***
+## Residuals    234                                             
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Homogeneity of Variances</span>
+
+covmats<span style="color:#f92672">&lt;-</span>joindata<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">group_by</span>(urbanization)<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">drop_na</span>()<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">do</span>(covs<span style="color:#f92672">=</span><span style="color:#a6e22e">cov</span>(.[2<span style="color:#f92672">:</span><span style="color:#ae81ff">8</span>]))
+<span style="color:#a6e22e">for</span>(i in <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">3</span>){<span style="color:#a6e22e">print</span>(<span style="color:#a6e22e">as.character</span>(covmats<span style="color:#f92672">$</span>urbanization[i])); <span style="color:#a6e22e">print</span>(covmats<span style="color:#f92672">$</span>covs[i])}
+</code></pre></div><pre><code>## [1] &quot;Rural&quot;
+## [[1]]
+##                            lifeexpectancy  diabeticrate foodinsecurerate
+## lifeexpectancy                 6.35630750 -6.536322e-01       -4.9811102
+## diabeticrate                  -0.65363217  2.261165e+00        4.0666946
+## foodinsecurerate              -4.98111018  4.066695e+00       18.8661919
+## limitedaccessfoodrate          2.63329284 -2.157059e+00       -4.2066192
+## free_reduced_lunch_percent    -0.02870968 -1.945706e+00       -5.9684541
+## costpermeal                    0.01756598  2.879765e-02        0.1211542
+## Household.Income            2513.97620444 -1.113480e+03    -3231.8512778
+##                            limitedaccessfoodrate free_reduced_lunch_percent
+## lifeexpectancy                      2.633293e+00              -2.870968e-02
+## diabeticrate                       -2.157059e+00              -1.945706e+00
+## foodinsecurerate                   -4.206619e+00              -5.968454e+00
+## limitedaccessfoodrate               6.638014e+01               2.449074e+01
+## free_reduced_lunch_percent          2.449074e+01               9.200310e+01
+## costpermeal                        -3.053687e-01              -4.528550e-01
+## Household.Income                   -1.819561e+04              -4.767283e+04
+##                             costpermeal Household.Income
+## lifeexpectancy               0.01756598        2513.9762
+## diabeticrate                 0.02879765       -1113.4801
+## foodinsecurerate             0.12115417       -3231.8513
+## limitedaccessfoodrate       -0.30536866      -18195.6123
+## free_reduced_lunch_percent  -0.45285505      -47672.8320
+## costpermeal                  0.04267863         539.1542
+## Household.Income           539.15419564    55909302.1399
+## 
+## [1] &quot;Urban&quot;
+## [[1]]
+##                            lifeexpectancy  diabeticrate foodinsecurerate
+## lifeexpectancy               5.690944e+00 -1.501944e+00    -3.262778e+00
+## diabeticrate                -1.501944e+00  2.294444e+00     2.027778e+00
+## foodinsecurerate            -3.262778e+00  2.027778e+00     1.286111e+01
+## limitedaccessfoodrate        5.791806e+00  1.431944e+00    -8.847222e-01
+## free_reduced_lunch_percent  -5.079444e+00  5.156944e+00     2.415278e+00
+## costpermeal                  6.335231e-02 -5.189815e-02     6.832407e-02
+## Household.Income             1.363101e+04 -7.869583e+03    -9.214233e+03
+##                            limitedaccessfoodrate free_reduced_lunch_percent
+## lifeexpectancy                      5.791806e+00              -5.079444e+00
+## diabeticrate                        1.431944e+00               5.156944e+00
+## foodinsecurerate                   -8.847222e-01               2.415278e+00
+## limitedaccessfoodrate               6.959444e+01               4.611944e+01
+## free_reduced_lunch_percent          4.611944e+01               2.117944e+02
+## costpermeal                        -2.170648e-01              -1.500023e+00
+## Household.Income                   -4.476632e+04              -1.697131e+05
+##                              costpermeal Household.Income
+## lifeexpectancy                0.06335231        13631.010
+## diabeticrate                 -0.05189815        -7869.583
+## foodinsecurerate              0.06832407        -9214.233
+## limitedaccessfoodrate        -0.21706481       -44766.321
+## free_reduced_lunch_percent   -1.50002315      -169713.133
+## costpermeal                   0.03638994         1321.786
+## Household.Income           1321.78619444    195357053.075
+## 
+## [1] NA
+## [[1]]
+## NULL
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Multivariate Normality</span>
+<span style="color:#a6e22e">nrow</span>(<span style="color:#a6e22e">filter</span>(joindata, urbanization<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;Rural&#34;</span>))
+</code></pre></div><pre><code>## [1] 172
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">nrow</span>(<span style="color:#a6e22e">filter</span>(joindata, urbanization<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;Urban&#34;</span>))
+</code></pre></div><pre><code>## [1] 82
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#ANOVA</span>
+<span style="color:#a6e22e">summary.aov</span>(man1)
+</code></pre></div><pre><code>##  Response lifeexpectancy :
+##               Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
+## urbanization   1   52.16  52.164  8.5113 0.003873 **
+## Residuals    234 1434.15   6.129                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+##  Response foodinsecurerate :
+##               Df Sum Sq Mean Sq F value Pr(&gt;F)
+## urbanization   1   13.4  13.446  0.7998 0.3721
+## Residuals    234 3934.3  16.813               
+## 
+##  Response diabeticrate :
+##               Df Sum Sq Mean Sq F value   Pr(&gt;F)   
+## urbanization   1  23.42 23.4242  10.307 0.001511 **
+## Residuals    234 531.77  2.2725                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+##  Response limitedaccessfoodrate :
+##               Df  Sum Sq Mean Sq F value Pr(&gt;F)
+## urbanization   1    21.8  21.784  0.3228 0.5705
+## Residuals    234 15790.1  67.479               
+## 
+##  Response Household.Income :
+##               Df     Sum Sq    Mean Sq F value    Pr(&gt;F)    
+## urbanization   1 8.9697e+09 8969747764  86.594 &lt; 2.2e-16 ***
+## Residuals    234 2.4239e+10  103583747                      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+##  Response free_reduced_lunch_percent :
+##               Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## urbanization   1  4954.7  4954.7  37.265 4.248e-09 ***
+## Residuals    234 31112.0   133.0                      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+##  Response costpermeal :
+##               Df Sum Sq  Mean Sq F value  Pr(&gt;F)  
+## urbanization   1 0.1439 0.143912  3.5509 0.06075 .
+## Residuals    234 9.4837 0.040529                  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## 18 observations deleted due to missingness
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Probability of at least one Type 1 Error</span>
+type1overall<span style="color:#f92672">&lt;-</span><span style="color:#ae81ff">1</span><span style="color:#f92672">-</span>(<span style="color:#ae81ff">1-0.05</span>)^8
+type1overall
+</code></pre></div><pre><code>## [1] 0.3365796
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Bonferroni Correction</span>
+bonferroni<span style="color:#f92672">&lt;-</span><span style="color:#ae81ff">0.05</span><span style="color:#f92672">/</span><span style="color:#ae81ff">8</span>
+bonferroni
+</code></pre></div><pre><code>## [1] 0.00625
+</code></pre><p><em>There is a significant effect, with a p-value of 2.2e-16, in urbanization when the MANOVA is performed, meaning there is a mean difference across urbanization status for one or some of the numeric response variables. However, we cannot decipher which variable is showing a mean difference with a MANOVA, so univariate ANOVAs were used to narrow this down. The assumptions for MANOVA that were likely met include the assumption for multivariate normality because there were 172 samples for Rural counties taken and 82 samples for Urban counties that were taken, which is more than 25 in each category. Homogeneity of covariances does not appear to be met because the covariances between urban and rural counties differ largely in a few areas, with some univariate and multivariate outliers, but this might be passable for the MANOVA, as the assumptions are difficult to meet.</em></p>
+<p><em>Univariate ANOVAs were performed to find responses showing a mean difference across groups, and life expectancy (p-value of 0.003873), diabetic rate (p-value of 0.001511), household income (p-value of 2.2e-16) and free and reduced lunch percent (p-value of 0.000000004248) all showed significance, meaning that the mean differences by urbanization status differed. For an ANOVA, we can assume that the assumptions of random sampling, normal distribution of the groups and equal variance of each group have been met, as the sample sizes contain independent responses for every county in Texas, and each variable contains more than 25 samples within each group.</em></p>
+<p><em>There was one MANOVA performed, and seven ANOVAs so overall 8 tests were performed.The probability that I made at least one Type-1 error is 0.3365796. The boneferroni adjusted significance level that I will use to keep the overall type I error rate at .05 is 0.00625. All four previously significant tests showed a significant difference even after Bonferroni adjustment for life expectancy, diabetic rate, household income, and free/reduced lunch percentage, as their p-values were much smaller than even the Bonferroni adjusted p-value. No Post-Hoc tests were done because there were only two categories within &ldquo;urbanization,&rdquo; so it was visible after doing ANOVAs where the differences were between groups.</em></p>
+<h2 id="randomization-test">Randomization Test</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Mean Difference in Cost Per Meal</span>
+joindata<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">group_by</span>(urbanization)<span style="color:#f92672">%&gt;%</span>
+  <span style="color:#a6e22e">summarize</span>(means<span style="color:#f92672">=</span><span style="color:#a6e22e">mean</span>(costpermeal))<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">summarize</span>(`mean_diff:`<span style="color:#f92672">=</span><span style="color:#a6e22e">diff</span>(means))
+</code></pre></div><pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1       0.0471
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Permutations</span>
+<span style="color:#a6e22e">set.seed</span>(<span style="color:#ae81ff">1234</span>)
+rand_dist<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">vector</span>()
+<span style="color:#a6e22e">for</span>(i in <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5000</span>){
+new<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data.frame</span>(costpermeal<span style="color:#f92672">=</span><span style="color:#a6e22e">sample</span>(joindata<span style="color:#f92672">$</span>costpermeal),
+  urbanization<span style="color:#f92672">=</span>joindata<span style="color:#f92672">$</span>urbanization)
+rand_dist[i]<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">mean</span>(new[new<span style="color:#f92672">$</span>urbanization<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;Urban&#34;</span>,]<span style="color:#f92672">$</span>costpermeal)<span style="color:#f92672">-</span>
+  <span style="color:#a6e22e">mean</span>(new[new<span style="color:#f92672">$</span>urbanization<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;Rural&#34;</span>,]<span style="color:#f92672">$</span>costpermeal)}
+<span style="color:#a6e22e">mean</span>(rand_dist<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">0.04713556</span><span style="color:#f92672">|</span> rand_dist<span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">-0.04713556</span>)
+</code></pre></div><pre><code>## [1] 0.0774
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Histogram of the Null Distribution and Test Statistic</span>
+{<span style="color:#a6e22e">hist</span>(rand_dist,main<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>, ylab <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Count (n)&#34;</span>,); <span style="color:#a6e22e">abline</span>(v<span style="color:#f92672">=</span><span style="color:#ae81ff">-0.04713556</span>,  col<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;red&#34;</span>); 
+  <span style="color:#a6e22e">abline</span>(v<span style="color:#f92672">=</span><span style="color:#ae81ff">0.04713556</span>,  col<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;red&#34;</span>)}
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-2-1} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Comparison to t-test</span>
+<span style="color:#a6e22e">t.test</span>(data<span style="color:#f92672">=</span>joindata, costpermeal<span style="color:#f92672">~</span>urbanization)
+</code></pre></div><pre><code>## 
+## 	Welch Two Sample t-test
+## 
+## data:  costpermeal by urbanization
+## t = -1.8102, df = 168.89, p-value = 0.07205
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.098540332  0.004269203
+## sample estimates:
+## mean in group Rural mean in group Urban 
+##            2.851279            2.898415
+</code></pre><p>*The null hypothesis of this randomization test is that the mean cost per meal is the same for urban and rural counties. The alternative hypothesis is that the mean cost per meal is not the same for urban and rural counties. The two tailed p-value of the randomization test came out to be 0.0754, which is not significant in comparison to a reference of 0.05. Moreover, when a Two Sample t-test was done, the p-value was 0.07205, which is also not significant, indicating that the randomization test achieved similar results. We can then fail to reject the null hypothesis that the mean cost per meal is the same for urban and rural counties, due to a large p-value. The plot of the null distribution shows the red line at the positive and negative test statistics, which was 0.04713556. *</p>
+<p>#Linear Regression</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Linear Regression Model</span>
+joindata<span style="color:#f92672">$</span>foodinsecurerate_c<span style="color:#f92672">&lt;-</span>joindata<span style="color:#f92672">$</span>foodinsecurerate<span style="color:#f92672">-</span><span style="color:#a6e22e">mean</span>(joindata<span style="color:#f92672">$</span>foodinsecurerate, 
+  na.rm<span style="color:#f92672">=</span>T)
+joindata<span style="color:#f92672">$</span>costpermeal_c<span style="color:#f92672">&lt;-</span>joindata<span style="color:#f92672">$</span>costpermeal<span style="color:#f92672">-</span><span style="color:#a6e22e">mean</span>(joindata<span style="color:#f92672">$</span>costpermeal, na.rm<span style="color:#f92672">=</span>T)
+fit<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">lm</span>(foodinsecurerate_c <span style="color:#f92672">~</span> costpermeal_c <span style="color:#f92672">*</span> border_status, data<span style="color:#f92672">=</span>joindata)
+<span style="color:#a6e22e">summary</span>(fit)
+</code></pre></div><pre><code>## 
+## Call:
+## lm(formula = foodinsecurerate_c ~ costpermeal_c * border_status, 
+##     data = joindata)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -8.2732 -2.4593 -0.0027  2.3783 10.3988 
+## 
+## Coefficients:
+##                                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                            -4.9538     0.8647  -5.729 2.90e-08 ***
+## costpermeal_c                          -0.1617     2.3624  -0.068    0.945    
+## border_statusNon-Border                 5.7605     0.8991   6.407 7.32e-10 ***
+## costpermeal_c:border_statusNon-Border  -2.5713     2.8136  -0.914    0.362    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 3.574 on 250 degrees of freedom
+## Multiple R-squared:  0.2246,	Adjusted R-squared:  0.2153 
+## F-statistic: 24.13 on 3 and 250 DF,  p-value: 9.478e-14
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Regression Plot</span>
+fit<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">ggplot</span>(<span style="color:#a6e22e">aes</span>(costpermeal_c, foodinsecurerate_c, color<span style="color:#f92672">=</span>border_status))<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_point</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_smooth</span>(method<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;lm&#34;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Regression of Food Insecurity Rate by Cost Per Meal&#34;</span>)
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-3-1} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Normality Assumption: Data is Normal</span>
+resids<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">lm</span>(foodinsecurerate_c<span style="color:#f92672">~</span>costpermeal_c<span style="color:#f92672">*</span>border_status, data<span style="color:#f92672">=</span>joindata)<span style="color:#f92672">$</span>residuals
+<span style="color:#a6e22e">ggplot</span>()<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_histogram</span>(<span style="color:#a6e22e">aes</span>(resids),bins<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Histogram of Residuals&#34;</span>)
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-3-2} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>()<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_qq</span>(<span style="color:#a6e22e">aes</span>(sample<span style="color:#f92672">=</span>resids))<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_qq</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;QQ Plot&#34;</span>)
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-3-3} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shapiro.test</span>(resids)
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  resids
+## W = 0.9957, p-value = 0.7085
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Linearity Assumption</span>
+fitted<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">lm</span>(foodinsecurerate_c<span style="color:#f92672">~</span>costpermeal_c<span style="color:#f92672">*</span>border_status, data<span style="color:#f92672">=</span>joindata)<span style="color:#f92672">$</span>fitted.values
+<span style="color:#a6e22e">ggplot</span>()<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_point</span>(<span style="color:#a6e22e">aes</span>(resids,fitted))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Residuals vs. Fitted Values&#34;</span>)
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-3-4} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Homoskedasticity</span>
+<span style="color:#a6e22e">bptest</span>(fit) <span style="color:#75715e">#Fail to reject the null hypothesis that data is homoskedastic</span>
+</code></pre></div><pre><code>## 
+## 	studentized Breusch-Pagan test
+## 
+## data:  fit
+## BP = 5.3442, df = 3, p-value = 0.1483
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Robust Standard Errors: Redo Regression</span>
+<span style="color:#a6e22e">coeftest</span>(fit, vcov <span style="color:#f92672">=</span> <span style="color:#a6e22e">vcovHC</span>(fit))
+</code></pre></div><pre><code>## 
+## t test of coefficients:
+## 
+##                                       Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)                           -4.95379    0.63103 -7.8503 1.219e-13 ***
+## costpermeal_c                         -0.16166    1.70938 -0.0946    0.9247    
+## border_statusNon-Border                5.76048    0.68115  8.4569 2.315e-15 ***
+## costpermeal_c:border_statusNon-Border -2.57129    2.17218 -1.1837    0.2376    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Proportion of the Variation Explained</span>
+<span style="color:#a6e22e">summary</span>(fit)<span style="color:#f92672">$</span>r.sq
+</code></pre></div><pre><code>## [1] 0.2245676
+</code></pre><p><em>Predicted food insecurity rate for an average cost per meal at a border county is 4.9538 percent below the centered mean of the food insecurity rate. Controlling for border status, for every one dollar increase in the centered cost per meal, the food insecurity rate decreases by 0.16166 percent. At an average cost per meal, non-border counties have a 5.76048 percent higher food insecurity rate as compared to border counties. The slope for cost per meal on food insecurity rate is 2.57129 units lower for non-border counties compared to border counties.</em></p>
+<p><em>The data meets the assumption of normality and homoskedasticity, and therefore linearity is also met through homoskedasticity. A Shapiro_Wilk Normality test was run, along with a histogram and QQ plot to check for normality, and all results confirmed normality of the data. The null hypothesis for homoskedasticity fails to be rejected after running the Breusch-Pagan test, with a p-value of 0.1483, which is greater than 0.05.</em></p>
+<p><em>After redoing the regression using homoskedastic standard errors, significance was maintained for the effect of border status when the cost per meal is controlled for. The standard errors for border status decreased by about two-tenths from 0.8991 to 0.68115, and the standard error for cost per meal decreased from 2.3624 to 1.70938. The standard error for the interaction between border status and cost per meal decreased slightly from 2.8136 to 2.17218 with robust standard errors.</em></p>
+<p><em>The proportion of the variation in the outcome that the model explains, or the R-squared value, is 0.2246, or 22.46%.</em></p>
+<p>#Linear Regression with Bootstrapped Standard Errors</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">fit<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">lm</span>(foodinsecurerate_c <span style="color:#f92672">~</span> costpermeal_c<span style="color:#f92672">*</span>border_status, data<span style="color:#f92672">=</span>joindata)
+<span style="color:#a6e22e">summary</span>(fit)
+</code></pre></div><pre><code>## 
+## Call:
+## lm(formula = foodinsecurerate_c ~ costpermeal_c * border_status, 
+##     data = joindata)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -8.2732 -2.4593 -0.0027  2.3783 10.3988 
+## 
+## Coefficients:
+##                                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                            -4.9538     0.8647  -5.729 2.90e-08 ***
+## costpermeal_c                          -0.1617     2.3624  -0.068    0.945    
+## border_statusNon-Border                 5.7605     0.8991   6.407 7.32e-10 ***
+## costpermeal_c:border_statusNon-Border  -2.5713     2.8136  -0.914    0.362    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 3.574 on 250 degrees of freedom
+## Multiple R-squared:  0.2246,	Adjusted R-squared:  0.2153 
+## F-statistic: 24.13 on 3 and 250 DF,  p-value: 9.478e-14
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Bootstrapping</span>
+<span style="color:#a6e22e">set.seed</span>(<span style="color:#ae81ff">1234</span>)
+samp_distn<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">replicate</span>(<span style="color:#ae81ff">5000</span>, {
+boot_dat <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">sample_frac</span>(joindata, replace<span style="color:#f92672">=</span>T) 
+fit <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">lm</span>(foodinsecurerate_c <span style="color:#f92672">~</span> costpermeal_c<span style="color:#f92672">*</span>border_status, data<span style="color:#f92672">=</span>boot_dat)
+<span style="color:#a6e22e">coef</span>(fit)
+})
+samp_distn <span style="color:#f92672">%&gt;%</span> t <span style="color:#f92672">%&gt;%</span> as.data.frame <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">summarize_all</span>(sd)
+</code></pre></div><pre><code>##   (Intercept) costpermeal_c border_statusNon-Border
+## 1   0.6358113      1.635783               0.6828607
+##   costpermeal_c:border_statusNon-Border
+## 1                              2.110855
+</code></pre><p><em>The bootstrapped standard errors shows similar standard errors that were seen in the robust standard errors of the linear regression, however they are very different than the original standard errors from the linear regression. The bootstrapped SE for costpermeal_c is 1.673076, which is similar to the robust SE of 1.70938, but different from the original SE of 2.3624. Because the bootstrapped and robust SEs went down, this means the p-values got smaller as well. The bootstrapped SE for border status is 0.6910803, which is similar to the robust SE of 0.68115, and smaller than the original SE of 0.8991, meaning the p-value is smaller for the adjusted SEs. The bootstrapped SE for the interaction is 2.158202, which is similar to the robust SE of 2.17218, but smaller than the original SE of 2.8136, meaning the p-value is smaller for the adjusted SEs too.</em></p>
+<p>#Logistic Regression</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Logistic Regression</span>
+joindata_log<span style="color:#f92672">&lt;-</span> joindata<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">mutate</span>(Urb_binary<span style="color:#f92672">=</span><span style="color:#a6e22e">ifelse</span>(urbanization<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;Urban&#34;</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">0</span>))
+fit<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">glm</span>(Urb_binary <span style="color:#f92672">~</span> limitedaccessfoodrate<span style="color:#f92672">+</span>Household.Income, data<span style="color:#f92672">=</span>joindata_log,
+  family<span style="color:#f92672">=</span><span style="color:#a6e22e">binomial</span>(link<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;logit&#34;</span>))
+<span style="color:#a6e22e">coeftest</span>(fit)
+</code></pre></div><pre><code>## 
+## z test of coefficients:
+## 
+##                          Estimate  Std. Error z value  Pr(&gt;|z|)    
+## (Intercept)           -6.1719e+00  9.1239e-01 -6.7645 1.337e-11 ***
+## limitedaccessfoodrate -6.2741e-03  1.6491e-02 -0.3805    0.7036    
+## Household.Income       1.0923e-04  1.7054e-05  6.4047 1.507e-10 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">exp</span>(<span style="color:#a6e22e">coef</span>(fit))
+</code></pre></div><pre><code>##           (Intercept) limitedaccessfoodrate      Household.Income 
+##           0.002087343           0.993745502           1.000109233
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Confusion Matrix</span>
+join_conf<span style="color:#f92672">&lt;-</span>joindata_log<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">drop_na</span>(limitedaccessfoodrate)<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">mutate</span>(prob<span style="color:#f92672">=</span><span style="color:#a6e22e">predict</span>(fit, 
+  type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;response&#34;</span>), 
+  prediction<span style="color:#f92672">=</span><span style="color:#a6e22e">ifelse</span>(prob<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">0.5</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">0</span>))
+classify<span style="color:#f92672">&lt;-</span>join_conf<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">transmute</span>(prob,prediction,truth<span style="color:#f92672">=</span>Urb_binary)
+classify
+</code></pre></div><pre><code>## # A tibble: 253 x 3
+##     prob prediction truth
+##    &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
+##  1 0.163          0     0
+##  2 0.665          1     0
+##  3 0.216          0     0
+##  4 0.237          0     1
+##  5 0.541          1     1
+##  6 0.437          0     1
+##  7 0.287          0     1
+##  8 0.619          1     1
+##  9 0.167          0     0
+## 10 0.454          0     1
+## # ... with 243 more rows
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">table</span>(prediction<span style="color:#f92672">=</span> classify<span style="color:#f92672">$</span>prediction, truth<span style="color:#f92672">=</span>classify<span style="color:#f92672">$</span>truth)<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">addmargins</span>()
+</code></pre></div><pre><code>##           truth
+## prediction   0   1 Sum
+##        0   154  48 202
+##        1    17  34  51
+##        Sum 171  82 253
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Accuracy</span>
+(<span style="color:#ae81ff">154+34</span>)<span style="color:#f92672">/</span><span style="color:#ae81ff">253</span>
+</code></pre></div><pre><code>## [1] 0.743083
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Sensitivity (TPR)</span>
+<span style="color:#ae81ff">34</span><span style="color:#f92672">/</span><span style="color:#ae81ff">82</span>
+</code></pre></div><pre><code>## [1] 0.4146341
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Specificity (FPR)</span>
+<span style="color:#ae81ff">154</span><span style="color:#f92672">/</span><span style="color:#ae81ff">171</span>
+</code></pre></div><pre><code>## [1] 0.9005848
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Precision (PPV)</span>
+<span style="color:#ae81ff">34</span><span style="color:#f92672">/</span><span style="color:#ae81ff">51</span>
+</code></pre></div><pre><code>## [1] 0.6666667
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#Density Plot of Log-Odds</span>
+join_conf<span style="color:#f92672">$</span>logit<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">predict</span>(fit,type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;link&#34;</span>)
+join_conf<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">ggplot</span>()<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_density</span>(<span style="color:#a6e22e">aes</span>(logit,color<span style="color:#f92672">=</span>urbanization,fill<span style="color:#f92672">=</span>urbanization), 
+  alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">.4</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme</span>(legend.position<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">.85</span>,<span style="color:#ae81ff">.85</span>))<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_vline</span>(xintercept<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)<span style="color:#f92672">+</span><span style="color:#a6e22e">xlab</span>(<span style="color:#e6db74">&#34;predictor (logit)&#34;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_rug</span>(<span style="color:#a6e22e">aes</span>(logit,color<span style="color:#f92672">=</span>urbanization)) <span style="color:#f92672">+</span> <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Density Plot of Log-Odds&#34;</span>) 
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-7-1} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#ROC Plot</span>
+<span style="color:#a6e22e">library</span>(plotROC)
+ROCplot<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">ggplot</span>(classify)<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_roc</span>(<span style="color:#a6e22e">aes</span>(d<span style="color:#f92672">=</span>truth,m<span style="color:#f92672">=</span>prob), n.cuts<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)<span style="color:#f92672">+</span><span style="color:#a6e22e">geom_segment</span>(<span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>,
+  xend<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, y<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, yend<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>), lty<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)<span style="color:#f92672">+</span><span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;ROC Curve&#34;</span>)
+ROCplot
+</code></pre></div><p>\begin{center}\includegraphics{project2_files/figure-latex/unnamed-chunk-7-2} \end{center}</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#AUC Calculation</span>
+<span style="color:#a6e22e">calc_auc</span>(ROCplot)
+</code></pre></div><pre><code>##   PANEL group       AUC
+## 1     1    -1 0.7925403
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#10-Fold CV</span>
+<span style="color:#a6e22e">set.seed</span>(<span style="color:#ae81ff">1234</span>)
+k<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>
+
+data1<span style="color:#f92672">&lt;-</span>joindata_log<span style="color:#a6e22e">[sample</span>(<span style="color:#a6e22e">nrow</span>(joindata_log)),] 
+folds<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">cut</span>(<span style="color:#a6e22e">seq</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#a6e22e">nrow</span>(joindata_log)),breaks<span style="color:#f92672">=</span>k,labels<span style="color:#f92672">=</span>F) 
+
+diags<span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">NULL</span>
+<span style="color:#a6e22e">for</span>(i in <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>k){          
+  train<span style="color:#f92672">&lt;-</span>data1[folds<span style="color:#f92672">!=</span>i,] 
+  test<span style="color:#f92672">&lt;-</span>data1[folds<span style="color:#f92672">==</span>i,]  
+  
+  truth<span style="color:#f92672">&lt;-</span>test<span style="color:#f92672">$</span>Urb_binary
+  
+  log_reg<span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">glm</span>(Urb_binary <span style="color:#f92672">~</span> limitedaccessfoodrate<span style="color:#f92672">+</span>Household.Income,
+                data<span style="color:#f92672">=</span>train, 
+                family<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;binomial&#34;</span>)
+  probs<span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">predict</span>(log_reg, type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;response&#34;</span>, newdata<span style="color:#f92672">=</span>test)
+  
+  diags<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">rbind</span>(diags,<span style="color:#a6e22e">class_diag</span>(probs,truth))
+}
+<span style="color:#a6e22e">summarize_all</span>(diags,mean,na.rm<span style="color:#f92672">=</span><span style="color:#66d9ef">TRUE</span>)
+</code></pre></div><pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.7312308 0.4194805 0.8875317 0.6244048 0.7852403
+</code></pre><p><em>The odds of urbanization with a limited food access rate of zero and a household income of zero is 0.002087343. Controlling for household income, for every one additional unit increase in the rate of limited access to food, the odds of urbanization decrease by a factor of 0.993745502, but this does not have a significant negative impact. Controlling for limited access to food rate, household income has a significant positive impact on the odds of urbanization. Controlling for limited access to food rate, for every one additional unit of household income,the odds of urbanization increase by a factor of 1.000109233.</em></p>
+<p><em>The accuracy of the model was reported to be 0.743083, which means that true results of classification, either positive or negative are reported 74.31% of the time for the classification of a county as urban or rural. The sensitivity was reported to be 0.4146341, which means that the true positive rate of counties being identified as urban happened 41.46% of the time. The specificity was reported to be 0.9005848, meaning that the true negative rate of counties being identified as rural happened 90.06% of the time. The precision of the model was 0.6666667, meaning that this is the proportion of counties classified as urban that actually are urban in reality.</em></p>
+<p><em>The ROC curve above shows the tradeoff between sensitivity and specificity, and the AUC is a reflection of the summarization of those values. We can see that as the true positive rate increases, the false positive rate increases as well. The calculation of the AUC from the ROC plot gave a value of 0.7925403, which falls within the &ldquo;fair&rdquo; range for how well the model of the rate of limited access to food and household income predicts the data of urbanization classification.</em></p>
+<p><em>A 10-fold cross validation was done, and the average out-of-sample accuracy was reported to be 0.7274744, which means that true results, either positive or negative are reported 72.75% of the time for the classification of a county as urban or rural. The sensitivity was reported to be 0.4075536, which means that the true positive rate of counties being identified as urban happened only 40.76% of the time. The specificty was reported to be 0.8796805, which means that correct identification of rural counties happened 87.97% of the time. The PPV was reported to be 0.6665476, meaning that this is the proportion of counties classified as urban that actually are urban in reality. The AUC of the model is 0.7722236, which falls in the classification of &ldquo;fair&rdquo; for how well the model predicts the data.</em></p>
+<p>#LASSO and CV</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(glmnet)
+joindata_nona<span style="color:#f92672">&lt;-</span>joindata_log<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">drop_na</span>()<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">select</span>(<span style="color:#f92672">-</span><span style="color:#a6e22e">c</span>(County, 
+  foodinsecurerate_c, costpermeal_c, urbanization))
+y<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">as.matrix</span>(joindata_nona<span style="color:#f92672">$</span>Urb_binary)
+x<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">model.matrix</span>(Urb_binary<span style="color:#f92672">~</span>.,data<span style="color:#f92672">=</span>joindata_nona)[,<span style="color:#ae81ff">-1</span>]
+<span style="color:#a6e22e">head</span>(x)
+</code></pre></div><pre><code>##   lifeexpectancy diabeticrate foodinsecurerate limitedaccessfoodrate
+## 1           73.8           11               19                    15
+## 2           76.8            9                9                    12
+## 3           76.3           14               20                    11
+## 4           76.9           14               16                    20
+## 5           77.0           11               15                     5
+## 6           72.4           11               14                    20
+##   free_reduced_lunch_percent costpermeal Household.Income uninsuredchildrenrate
+## 1                         61        2.75            42412                    11
+## 2                         42        2.94            63451                    12
+## 3                         66        2.94            45318                    10
+## 4                         56        2.95            46970                    13
+## 5                         32        2.83            58311                    13
+## 6                         51        3.06            55337                    12
+##   border_statusNon-Border childfoodinsecurityrate
+## 1                       1                   0.234
+## 2                       1                   0.184
+## 3                       1                   0.253
+## 4                       1                   0.263
+## 5                       1                   0.201
+## 6                       1                   0.203
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">cv<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">cv.glmnet</span>(x,y, family<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;binomial&#34;</span>)
+lasso<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">glmnet</span>(x,y,lambda<span style="color:#f92672">=</span>cv<span style="color:#f92672">$</span>lambda.1se)
+<span style="color:#a6e22e">coef</span>(lasso)
+</code></pre></div><pre><code>## 11 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                                       s0
+## (Intercept)                 0.0690545319
+## lifeexpectancy              .           
+## diabeticrate                .           
+## foodinsecurerate            .           
+## limitedaccessfoodrate       .           
+## free_reduced_lunch_percent  .           
+## costpermeal                 .           
+## Household.Income            0.0000142346
+## uninsuredchildrenrate      -0.0359355608
+## border_statusNon-Border     .           
+## childfoodinsecurityrate     .
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#10-fold CV</span>
+<span style="color:#a6e22e">set.seed</span>(<span style="color:#ae81ff">1234</span>)
+k<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>
+data <span style="color:#f92672">&lt;-</span> joindata_nona <span style="color:#f92672">%&gt;%</span> sample_frac
+folds <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">ntile</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#a6e22e">nrow</span>(data),n<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)
+diags<span style="color:#f92672">&lt;-</span><span style="color:#66d9ef">NULL</span>
+<span style="color:#a6e22e">for</span>(i in <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>k){
+train <span style="color:#f92672">&lt;-</span> data[folds<span style="color:#f92672">!=</span>i,]
+test <span style="color:#f92672">&lt;-</span> data[folds<span style="color:#f92672">==</span>i,] 
+truth <span style="color:#f92672">&lt;-</span> test<span style="color:#f92672">$</span>Urb_binary
+fit <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">glm</span>(Urb_binary<span style="color:#f92672">~</span>uninsuredchildrenrate<span style="color:#f92672">+</span>Household.Income,data<span style="color:#f92672">=</span>train,
+           family<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;binomial&#34;</span>)
+probs <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">predict</span>(fit, newdata<span style="color:#f92672">=</span>test, type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;response&#34;</span>)
+diags<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">rbind</span>(diags,<span style="color:#a6e22e">class_diag</span>(probs,truth))
+}
+diags<span style="color:#f92672">%&gt;%</span><span style="color:#a6e22e">summarize_all</span>(mean)
+</code></pre></div><pre><code>##         acc      sens      spec      ppv       auc
+## 1 0.8179348 0.6327922 0.9250668 0.825873 0.8799389
+</code></pre><p><em>The LASSO regression retained Household Income and Rate of Uninsured Children as the variables that were the best predictors for Urban classification. The 10-fold CV performed on the binary Urban classification variable gave an out-of-sample accuracy of 0.8269928, which is greater than the out-of-sample accuracy in the logisitic regression, which was 0.7274744. The AUC from the 10-fold CV for the LASSO was 0.874748 which is really good, as opposed to an AUC of 0.7722236 for the logistic regression, which is fair. This means that the LASSO regression performs better than a logisitic regression at predicting true results, either positive or negative for the classification of a county as urban or rural, by reducing overfitting of the model.</em></p>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

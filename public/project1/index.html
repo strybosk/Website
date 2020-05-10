@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Kathleen Strybos" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Project1</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume.pdf/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project1/">Project1</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          February 28, 2020
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="project-1-exploratory-data-analysis-food-insecurity-and-demographics-in-texas-counties" class="section level2">
+<h2>Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties</h2>
+<p>#Introduction
+<em>The two datasets that were chosen for this project center around health across counties in Texas. The “health” dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website funded by the Robert Wood Johnson Foundation Program.</em></p>
+<p><em>The other dataset, called “mapmeal” was acquired through Feeding America. This dataset contains 4 variables, including county names in Texas, the food insecurity rate across the entire county’s population, child food insecurity rate more specifically, and the average cost per meal in a county. These two datasets are interesting to me because I am going into the field of healthcare. I hope to become a pediatrician, so data centered around children’s health, family dynamics and accessibility to resources is a point of interest for me, as it pertains to my future career. I expect to see that there is an association between child food insecurity rate and the percentage of children in a county on free and reduced lunch. The underlying variable within this situation likely has to do with household income as well. Many of the variables in these datasets pertain to socioeconomic status within the counties, and I expect to see associations that are typical for certain socioeconomic statuses.</em></p>
+<pre class="r"><code>library(tidyverse)
+health= read.csv(&quot;health.csv&quot;)
+mapmeal= read.csv(&quot;mapmeal.csv&quot;)
+glimpse(health)</code></pre>
+<pre><code>## Observations: 254
+## Variables: 15
+## $ County                     &lt;fct&gt; Anderson, Andrews, Angelina, Aransas, Arch…
+## $ lifeexpectancy             &lt;dbl&gt; 73.8, 76.8, 76.3, 76.9, 77.0, 72.4, 78.3, …
+## $ frequentmentaldistressrate &lt;int&gt; 11, 10, 13, 12, 10, 10, 11, 11, 13, 11, 11…
+## $ diabeticrate               &lt;int&gt; 11, 9, 14, 14, 11, 11, 12, 10, 10, 11, 10,…
+## $ foodinsecurerate           &lt;int&gt; 19, 9, 20, 16, 15, 14, 9, 16, 10, 15, 13, …
+## $ limitedaccessfoodrate      &lt;int&gt; 15, 12, 11, 20, 5, 20, 8, 3, 4, 13, 11, 4,…
+## $ uninsuredadultrate         &lt;int&gt; 21, 22, 24, 24, 20, 17, 23, 22, 34, 20, 25…
+## $ uninsuredchildrenrate      &lt;int&gt; 11, 12, 10, 13, 13, 12, 9, 11, 13, 13, 12,…
+## $ Household.Income           &lt;int&gt; 42412, 63451, 45318, 46970, 58311, 55337, …
+## $ householdiincome_black     &lt;int&gt; 24427, 38359, 28509, NA, NA, NA, 72827, 40…
+## $ householdincome_hispanic   &lt;int&gt; 37635, 66319, 41673, 43302, 34375, 150250,…
+## $ householdincome_white      &lt;int&gt; 48013, 73648, 51631, 45496, 65504, 64737, …
+## $ free_reduced_lunch_percent &lt;int&gt; 61, 42, 66, 56, 32, 51, 63, 54, 81, 54, 66…
+## $ urbanization               &lt;fct&gt; Rural, Rural, Rural, Urban, Urban, Urban, …
+## $ border_status              &lt;fct&gt; Non-Border, Non-Border, Non-Border, Non-Bo…</code></pre>
+<pre class="r"><code>glimpse(mapmeal)</code></pre>
+<pre><code>## Observations: 254
+## Variables: 4
+## $ county                  &lt;fct&gt; Anderson, Andrews, Angelina, Aransas, Archer,…
+## $ foodinsecurityrate      &lt;dbl&gt; 0.182, 0.084, 0.189, 0.165, 0.140, 0.131, 0.0…
+## $ childfoodinsecurityrate &lt;dbl&gt; 0.234, 0.184, 0.253, 0.263, 0.201, 0.203, 0.2…
+## $ costpermeal             &lt;dbl&gt; 2.75, 2.94, 2.94, 2.95, 2.83, 3.06, 2.78, 3.1…</code></pre>
+</div>
+<div id="tidying-rearranging-widelong" class="section level2">
+<h2>Tidying: Rearranging Wide/Long</h2>
+<pre class="r"><code>#Untidying &quot;health&quot; data#
+health1 &lt;-health %&gt;% pivot_longer(c(&quot;uninsuredadultrate&quot;, &quot;uninsuredchildrenrate&quot;), 
+names_to = &quot;uninsured&quot;, values_to = &quot;percentage uninsured&quot;) %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 508
+## Variables: 15
+## $ County                     &lt;fct&gt; Anderson, Anderson, Andrews, Andrews, Ange…
+## $ lifeexpectancy             &lt;dbl&gt; 73.8, 73.8, 76.8, 76.8, 76.3, 76.3, 76.9, …
+## $ frequentmentaldistressrate &lt;int&gt; 11, 11, 10, 10, 13, 13, 12, 12, 10, 10, 10…
+## $ diabeticrate               &lt;int&gt; 11, 11, 9, 9, 14, 14, 14, 14, 11, 11, 11, …
+## $ foodinsecurerate           &lt;int&gt; 19, 19, 9, 9, 20, 20, 16, 16, 15, 15, 14, …
+## $ limitedaccessfoodrate      &lt;int&gt; 15, 15, 12, 12, 11, 11, 20, 20, 5, 5, 20, …
+## $ Household.Income           &lt;int&gt; 42412, 42412, 63451, 63451, 45318, 45318, …
+## $ householdiincome_black     &lt;int&gt; 24427, 24427, 38359, 38359, 28509, 28509, …
+## $ householdincome_hispanic   &lt;int&gt; 37635, 37635, 66319, 66319, 41673, 41673, …
+## $ householdincome_white      &lt;int&gt; 48013, 48013, 73648, 73648, 51631, 51631, …
+## $ free_reduced_lunch_percent &lt;int&gt; 61, 61, 42, 42, 66, 66, 56, 56, 32, 32, 51…
+## $ urbanization               &lt;fct&gt; Rural, Rural, Rural, Rural, Rural, Rural, …
+## $ border_status              &lt;fct&gt; Non-Border, Non-Border, Non-Border, Non-Bo…
+## $ uninsured                  &lt;chr&gt; &quot;uninsuredadultrate&quot;, &quot;uninsuredchildrenra…
+## $ `percentage uninsured`     &lt;int&gt; 21, 11, 22, 12, 24, 10, 24, 13, 20, 13, 17…</code></pre>
+<pre class="r"><code>#Tidying &quot;health&quot; data#
+health1 %&gt;% spread(key=&quot;uninsured&quot;, value= &quot;percentage uninsured&quot;)</code></pre>
+<pre><code>## # A tibble: 254 x 15
+##    County lifeexpectancy frequentmentald… diabeticrate foodinsecurerate
+##    &lt;fct&gt;           &lt;dbl&gt;            &lt;int&gt;        &lt;int&gt;            &lt;int&gt;
+##  1 Ander…           73.8               11           11               19
+##  2 Andre…           76.8               10            9                9
+##  3 Angel…           76.3               13           14               20
+##  4 Arans…           76.9               12           14               16
+##  5 Archer           77                 10           11               15
+##  6 Armst…           72.4               10           11               14
+##  7 Atasc…           78.3               11           12                9
+##  8 Austin           79.1               11           10               16
+##  9 Bailey           78.4               13           10               10
+## 10 Bande…           80.3               11           11               15
+## # … with 244 more rows, and 10 more variables: limitedaccessfoodrate &lt;int&gt;,
+## #   Household.Income &lt;int&gt;, householdiincome_black &lt;int&gt;,
+## #   householdincome_hispanic &lt;int&gt;, householdincome_white &lt;int&gt;,
+## #   free_reduced_lunch_percent &lt;int&gt;, urbanization &lt;fct&gt;, border_status &lt;fct&gt;,
+## #   uninsuredadultrate &lt;int&gt;, uninsuredchildrenrate &lt;int&gt;</code></pre>
+<pre class="r"><code>#Untidying &quot;mapmeal&quot; data#
+mapmeal1&lt;- mapmeal %&gt;% pivot_longer(c(&quot;foodinsecurityrate&quot;, &quot;childfoodinsecurityrate&quot;), 
+names_to= &quot;food insecurity&quot;, 
+values_to= &quot;percentage food insecure&quot;) %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 508
+## Variables: 4
+## $ county                     &lt;fct&gt; Anderson, Anderson, Andrews, Andrews, Ange…
+## $ costpermeal                &lt;dbl&gt; 2.75, 2.75, 2.94, 2.94, 2.94, 2.94, 2.95, …
+## $ `food insecurity`          &lt;chr&gt; &quot;foodinsecurityrate&quot;, &quot;childfoodinsecurity…
+## $ `percentage food insecure` &lt;dbl&gt; 0.182, 0.234, 0.084, 0.184, 0.189, 0.253, …</code></pre>
+<pre class="r"><code>#Tidying &quot;health&quot; data#
+mapmeal1 %&gt;% spread(key=&quot;food insecurity&quot;, value= &quot;percentage food insecure&quot;)</code></pre>
+<pre><code>## # A tibble: 254 x 4
+##    county    costpermeal childfoodinsecurityrate foodinsecurityrate
+##    &lt;fct&gt;           &lt;dbl&gt;                   &lt;dbl&gt;              &lt;dbl&gt;
+##  1 Anderson         2.75                   0.234              0.182
+##  2 Andrews          2.94                   0.184              0.084
+##  3 Angelina         2.94                   0.253              0.189
+##  4 Aransas          2.95                   0.263              0.165
+##  5 Archer           2.83                   0.201              0.14 
+##  6 Armstrong        3.06                   0.203              0.131
+##  7 Atascosa         2.78                   0.212              0.088
+##  8 Austin           3.12                   0.228              0.147
+##  9 Bailey           2.98                   0.243              0.112
+## 10 Bandera          3.4                    0.255              0.145
+## # … with 244 more rows</code></pre>
+<p><em>For the tidying/untidying portion of this project, I decided to untidy the columns in the “health” dataset concerned with the rate of the adult population that is uninsured and the rate of the child population that is uninsured. I created a new dataset called “health1” to house these modifications. I used pivot_longer() to accomplish the untidying since my “health” data was already tidy. With this result, I could see both the adult and child uninsurance rates in one column for a particular county. For the “mapmeal” dataset, I decided to untidy the columns for child food insecurity rate and overall food insecurity rate using the pivot_longer() function, since my data was already tidy. I created a new dataset called “mapmeal1” to house these modifications. With this result, I could see both the overall population’s and children’s food insecurity rates for a particular county.</em></p>
+<p><em>To re-tidy my datasets, I used the spread() function. For the “health1” dataset, I filled in “uninsured” and “percentage uninsured” for key and value, respectively to re-tidy my data. For the “mapmeal1” I filled in “food insecurity” and “percentage food insecure” for key and value, respectively. This allowed me to re-tidy my data.</em></p>
+<p>#Joining/Merging</p>
+<pre class="r"><code>joindata &lt;-health %&gt;% full_join(mapmeal, by=c(&quot;County&quot;= &quot;county&quot;))
+joindata %&gt;% glimpse()</code></pre>
+<pre><code>## Observations: 254
+## Variables: 18
+## $ County                     &lt;fct&gt; Anderson, Andrews, Angelina, Aransas, Arch…
+## $ lifeexpectancy             &lt;dbl&gt; 73.8, 76.8, 76.3, 76.9, 77.0, 72.4, 78.3, …
+## $ frequentmentaldistressrate &lt;int&gt; 11, 10, 13, 12, 10, 10, 11, 11, 13, 11, 11…
+## $ diabeticrate               &lt;int&gt; 11, 9, 14, 14, 11, 11, 12, 10, 10, 11, 10,…
+## $ foodinsecurerate           &lt;int&gt; 19, 9, 20, 16, 15, 14, 9, 16, 10, 15, 13, …
+## $ limitedaccessfoodrate      &lt;int&gt; 15, 12, 11, 20, 5, 20, 8, 3, 4, 13, 11, 4,…
+## $ uninsuredadultrate         &lt;int&gt; 21, 22, 24, 24, 20, 17, 23, 22, 34, 20, 25…
+## $ uninsuredchildrenrate      &lt;int&gt; 11, 12, 10, 13, 13, 12, 9, 11, 13, 13, 12,…
+## $ Household.Income           &lt;int&gt; 42412, 63451, 45318, 46970, 58311, 55337, …
+## $ householdiincome_black     &lt;int&gt; 24427, 38359, 28509, NA, NA, NA, 72827, 40…
+## $ householdincome_hispanic   &lt;int&gt; 37635, 66319, 41673, 43302, 34375, 150250,…
+## $ householdincome_white      &lt;int&gt; 48013, 73648, 51631, 45496, 65504, 64737, …
+## $ free_reduced_lunch_percent &lt;int&gt; 61, 42, 66, 56, 32, 51, 63, 54, 81, 54, 66…
+## $ urbanization               &lt;fct&gt; Rural, Rural, Rural, Urban, Urban, Urban, …
+## $ border_status              &lt;fct&gt; Non-Border, Non-Border, Non-Border, Non-Bo…
+## $ foodinsecurityrate         &lt;dbl&gt; 0.182, 0.084, 0.189, 0.165, 0.140, 0.131, …
+## $ childfoodinsecurityrate    &lt;dbl&gt; 0.234, 0.184, 0.253, 0.263, 0.201, 0.203, …
+## $ costpermeal                &lt;dbl&gt; 2.75, 2.94, 2.94, 2.95, 2.83, 3.06, 2.78, …</code></pre>
+<p><em>I chose to join my “health” and “mapmeal” datasets using a full join. By using a full join, I was able to keep all of my observations. Even though there are NAs where there are no observations, this was not due to the joining process. Because both datasets were joined on the basis of Texas counties, all of the data alligned really well, hence the reason a full join was the appropriate choice. The only NAs that are present in my data were there when I retrieved the data. The NA observations are not there because there was never any information retrieved for a particular variable in a given column. There were not any cases dropped. I know this because there were 254 rows in the “health” dataset, and there are 254 rows in the “joindata.” This means that there were not any cases dropped.</em></p>
+<p>#Wrangling</p>
+<pre class="r"><code>#Using Core dplyr Functions
+smalljoindata&lt;-joindata %&gt;% mutate(foodcost_peryear= (costpermeal*3*365)) %&gt;%
+filter(lifeexpectancy &gt;80) %&gt;% 
+select(County,lifeexpectancy, uninsuredadultrate,
+foodcost_peryear, Household.Income,
+border_status, urbanization, diabeticrate) %&gt;% 
+arrange(lifeexpectancy) %&gt;% group_by(border_status)
+joindata %&gt;% summarize_all(function(x)sum(is.na(x)))</code></pre>
+<pre><code>##   County lifeexpectancy frequentmentaldistressrate diabeticrate
+## 1      0             17                          0            0
+##   foodinsecurerate limitedaccessfoodrate uninsuredadultrate
+## 1                0                     1                  0
+##   uninsuredchildrenrate Household.Income householdiincome_black
+## 1                     0                0                     96
+##   householdincome_hispanic householdincome_white free_reduced_lunch_percent
+## 1                       11                    11                          1
+##   urbanization border_status foodinsecurityrate childfoodinsecurityrate
+## 1            0             0                  0                       0
+##   costpermeal
+## 1           0</code></pre>
+<pre class="r"><code>#Creating Summary Statistics
+smalljoindata %&gt;% summarize(mean_lifeexpectancy=
+mean(lifeexpectancy, na.rm = T), 
+sd_foodcost_year=sd(foodcost_peryear, na.rm = T), 
+IQR_householdincome=IQR(Household.Income,
+na.rm = T), number_counties=n_distinct(County),
+min_householdincome=min(Household.Income), 
+cor_foodcost_diabetes=cor(foodcost_peryear,
+diabeticrate), 
+median_uninsuredadultrate=median(uninsuredadultrate))</code></pre>
+<pre><code>## # A tibble: 2 x 8
+##   border_status mean_lifeexpect… sd_foodcost_year IQR_householdin…
+##   &lt;fct&gt;                    &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Border                    83.6             364.            5292.
+## 2 Non-Border                81.2             159.           30948.
+## # … with 4 more variables: number_counties &lt;int&gt;, min_householdincome &lt;int&gt;,
+## #   cor_foodcost_diabetes &lt;dbl&gt;, median_uninsuredadultrate &lt;dbl&gt;</code></pre>
+<pre class="r"><code>smalljoindata %&gt;% 
+group_by(urbanization, border_status) %&gt;%
+summarize(max(lifeexpectancy))</code></pre>
+<pre><code>## # A tibble: 4 x 3
+## # Groups:   urbanization [2]
+##   urbanization border_status `max(lifeexpectancy)`
+##   &lt;fct&gt;        &lt;fct&gt;                         &lt;dbl&gt;
+## 1 Rural        Border                         90.6
+## 2 Rural        Non-Border                     81.6
+## 3 Urban        Border                         86.4
+## 4 Urban        Non-Border                     83</code></pre>
+<pre class="r"><code>smalljoindata %&gt;% group_by(urbanization) %&gt;%
+summarize(n_distinct(County))</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   urbanization `n_distinct(County)`
+##   &lt;fct&gt;                       &lt;int&gt;
+## 1 Rural                          12
+## 2 Urban                          16</code></pre>
+<pre class="r"><code>smalljoindata %&gt;% group_by(urbanization,
+border_status) %&gt;%
+summarize(median(diabeticrate))</code></pre>
+<pre><code>## # A tibble: 4 x 3
+## # Groups:   urbanization [2]
+##   urbanization border_status `median(diabeticrate)`
+##   &lt;fct&gt;        &lt;fct&gt;                          &lt;int&gt;
+## 1 Rural        Border                            11
+## 2 Rural        Non-Border                        11
+## 3 Urban        Border                            10
+## 4 Urban        Non-Border                         9</code></pre>
+<p><em>In order to provide a dataset that would serve for generating summary statistics, I used all six core dplyr functions to create a new dataset. I ended up with a dataset, “smalljoindata,” that is grouped by border status and contains all of the counties with life expectancies greater than 80, with columns based on the name of the county, average food cost per year in the county, average life expectancy, rate of uninsured adults in the population, the total average estimated food cost per year per household, average household income, border status of the county, urbanization status of urban or rural, and rate of diabetes in the population. In order to show my use of the summarize() function, I used summarize_all() to find how many NAs were in each column of my original “joindata” dataset. After using the six core dplyr functions, I computed summary statistics using summarize(). In order to be more efficient with space, I created a longer function containing six different summary statistics: mean, standard deviation, IQR, number of distinct counties, minimum, and correlation, all grouped by border status. I then made a few separate functions in which I grouped by both urbanization and border status or just urbanization.</em></p>
+<p><em>With this code, I found that the average life expectancy in border counties is about 2.4 years greater than in non-border counties. The standard deviation of the food cost per year is $364 in border counties as compared to $159 in non-border counties, meaning there are large fluctuations in food cost. The IQR of household income is a smaller range of $5,292 in border counties as opposed to $30,948 in non-border counties. On a more basic level, we can see that of this dataset that contains an average life expectancy of 80 or older, 10 of these counties are in border counties, and 18 are in non-border counties. The county with the lowest average household income is $29,761 in border counties and $41,746 in non-border counties. Moreover, in border counties, the median rate of uninsured adults is 33.5%, while in non-border counties it’s only 18.5%, which is nearly 2x less. Lastly, I found a very interesting correlation between average food cost per year and the rate of diabetes in the population. In border counties, there is a strong positive correlation of 0.704 between yearly food cost and the rate of diabetes, while in non-border counties there is a weaker, negative correlation of -0.3875. In the function in which I grouped max life expectancy by urbanization and border status, I, interestingly enough, found that the longest life expectancy was in a rural, border county, at 90.6 years. Using n_distinct(), I saw that 12 of the selected counties were rural, while 16 were urban. Lastly, I found that when I grouped by border status and urbanization that the median rate of diabetes was the same among rural border and rural non-border counties.</em></p>
+<p>#Visualizing</p>
+<pre class="r"><code>#Correlation Heatmap
+matrixdata &lt;- joindata%&gt;% na.omit %&gt;% select_if(is.numeric)
+glimpse(cor(matrixdata))</code></pre>
+<pre><code>##  num [1:15, 1:15] 1 -0.3803 -0.5403 -0.4993 -0.0502 ...
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ : chr [1:15] &quot;lifeexpectancy&quot; &quot;frequentmentaldistressrate&quot; &quot;diabeticrate&quot; &quot;foodinsecurerate&quot; ...
+##   ..$ : chr [1:15] &quot;lifeexpectancy&quot; &quot;frequentmentaldistressrate&quot; &quot;diabeticrate&quot; &quot;foodinsecurerate&quot; ...</code></pre>
+<pre class="r"><code>heatmap &lt;- cor(matrixdata) %&gt;% 
+as.data.frame %&gt;% rownames_to_column %&gt;%
+pivot_longer(-1, names_to = &quot;name&quot;, 
+values_to = &quot;correlation&quot;)
+glimpse(heatmap)</code></pre>
+<pre><code>## Observations: 225
+## Variables: 3
+## $ rowname     &lt;chr&gt; &quot;lifeexpectancy&quot;, &quot;lifeexpectancy&quot;, &quot;lifeexpectancy&quot;, &quot;li…
+## $ name        &lt;chr&gt; &quot;lifeexpectancy&quot;, &quot;frequentmentaldistressrate&quot;, &quot;diabetic…
+## $ correlation &lt;dbl&gt; 1.00000000, -0.38026411, -0.54031911, -0.49932955, -0.050…</code></pre>
+<pre class="r"><code>library(ggplot2)
+heatmap %&gt;% ggplot(aes(rowname, name, fill=correlation))+
+geom_tile()+ scale_fill_gradient2(low=&quot;coral1&quot;, mid=&quot;white&quot;,
+high = &quot;aquamarine3&quot;)+ geom_text(aes(label=round(correlation, 2)),
+color=&quot;black&quot;, size= 0.3) + 
+theme(axis.text.x = element_text(angle = 90)) + coord_fixed() +
+ggtitle(&quot;Correlation Heatmap of Variables&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Dot Plot for Percentage of Children on Free/Reduced Lunch and Household Income#
+library(ggplot2)
+ggplot(joindata, aes(x=Household.Income, 
+y=free_reduced_lunch_percent, color=urbanization)) +
+ggtitle(&quot;Children on Free/Reduced Lunch vs. Household Income&quot;) +
+labs(y= &quot;Children on Free/Reduced Lunch (%)&quot;, 
+x = &quot;Household Income ($)&quot;) + 
+theme(legend.position = &quot;bottom&quot;) +
+geom_point(size=1, shape= 5) + 
+geom_smooth(method=&#39;lm&#39;, formula=y~x) + 
+scale_y_continuous(lim=c(0,100))+ 
+scale_x_continuous(labels = function(x) format(x, scientific = FALSE))+
+scale_color_brewer(palette = &quot;Set2&quot;) + labs(color= &quot;Urbanization Status&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Bar Plot of Mean Life Expectancy By Border Status#
+library(ggplot2)
+ggplot(joindata, aes(x=border_status, y=lifeexpectancy,
+color=urbanization)) +scale_color_manual(values=c(&quot;#CC66CC&quot;, &quot;#6699FF&quot;))+
+scale_fill_manual(values=c(&quot;#CC66CC&quot;, &quot;#6699FF&quot;))+
+geom_bar(aes(y=lifeexpectancy,fill= urbanization), 
+stat=&quot;summary&quot;, fun.y=&quot;mean&quot;, position= &quot;dodge&quot;) + 
+scale_y_continuous(name= &quot;Mean Life Expectancy (years)&quot;, 
+(breaks=seq(0,150, 25)), lim=c(0,100))+
+ggtitle(&quot;Mean Life Expectancy By Border Status&quot;) +
+xlab(&quot;Border Status&quot;)+
+theme(legend.position = &quot;bottom&quot;) +
+labs(color= &quot;Urbanization Status&quot;) +
+labs(fill= &quot;Urbanization Status&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" />
+<em>The Correlation Heatmap shows that there is an obvious correlation of 1 among each variable and itself. The rest of the table gives small boxes with a value for the correlation between the two given numeric variables at a given coordinate. I can see that there is a strong negative correlation between household income and the percentage of children in the county on free/reduced lunch. Moreover, there is also a strong negative correlation between household income across all races and child food insecurity rates. Looking at positive correlations, I can see that there is a positive correlation between the rate of uninsured adults and frequent mental distress. There is also a stronger correlation between the rate of uninsured adults and the percentage of children in the county on free/reduced lunch. I can also see, as predicted in my Introduction, that there is a positive correlation between child food insecurity rate and the percentage of children on free/reduced lunches.</em></p>
+<p><em>The Dot Plot shows the relationship between household income and the percentage of children on free/reduced lunch. As we can clearly see, there is a negative linear relationship between the two variables, such that as household income increases, the percentage of children on free/reduced lunch decreases. Furthermore, we can see that the slope of this relationship is even steeper for children in rural counties, showing that the percentage of children on free/reduced lunch drops off more steeply as household income increases, as compared to urban counties.</em></p>
+<p><em>The Bar Plot shows how the mean life expectancy differs based on border status and by urbanization status of counties. Interestingly enough, the data show that the life expectancy is actually slightly higher in counties that are classified as border communities and also slightly higher in border regions classified as “Urban”. This is the opposite result as many would think, as accessibility to healthcare is often harder to come by in border regions. Because there have not been any tests for the statistical significance of these differences, I cannot be sure that life expectancy among border and non-border counties differs significantly.</em></p>
+<p>#Dimensionality Reduction</p>
+<pre class="r"><code>library(cluster)
+pam_data &lt;-joindata%&gt;% select(lifeexpectancy, foodinsecurerate, Household.Income)
+sil_width &lt;-vector()
+for (i in 2:10) {
+  pam_fit &lt;- pam(pam_data, k=i)
+  sil_width[i] &lt;-pam_fit$silinfo$avg.width
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+
+scale_x_continuous(name=&quot;k&quot;,breaks=1:10) +
+ggtitle(&quot;Silhouette Width vs Number of Clusters in PAM&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pam2 &lt;- joindata %&gt;% 
+select(lifeexpectancy, foodinsecurerate,
+Household.Income)%&gt;% pam(2)
+pam2</code></pre>
+<pre><code>## Medoids:
+##       ID lifeexpectancy foodinsecurerate Household.Income
+## [1,] 136           81.4               10            42650
+## [2,] 251           77.7                7            58363
+## Clustering vector:
+##   [1] 1 2 1 1 2 2 1 2 1 2 2 1 1 2 2 2 2 1 1 2 1 1 1 1 1 1 2 2 2 1 1 1 2 1 1 2 1
+##  [38] 1 2 1 1 1 2 1 1 2 1 1 2 2 1 2 1 1 1 1 2 1 1 1 2 1 1 1 1 1 1 2 1 2 1 1 1 2
+##  [75] 2 1 1 1 2 1 1 1 2 2 1 2 2 2 1 1 2 1 1 2 1 1 1 2 1 2
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 154 entries ]
+## Objective function:
+##    build     swap 
+## 6019.958 5348.823 
+## 
+## Available components:
+##  [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+##  [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;       &quot;data&quot;</code></pre>
+<pre class="r"><code>pam2$silinfo$avg.width</code></pre>
+<pre><code>## [1] 0.5765833</code></pre>
+<pre class="r"><code>finalclust &lt;-joindata %&gt;% 
+mutate(cluster=as.factor(pam2$clustering))
+confmat3&lt;- finalclust%&gt;% group_by(border_status)%&gt;%
+count(cluster)%&gt;% arrange(desc(n))%&gt;%
+pivot_wider(names_from = &quot;cluster&quot;, 
+values_from = &quot;n&quot;, values_fill = list(&#39;n&#39;=0))
+
+ggplot(finalclust, aes(x=lifeexpectancy,
+y=foodinsecurerate, color=cluster))+ geom_point()  +
+ggtitle(&quot;Food Insecurity Rate vs Life Expectancy&quot;) +
+labs(y= &quot;Food Insecurity Rate (%)&quot;, 
+x = &quot;Life Expectancy (years)&quot;) + 
+theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(GGally)
+ggpairs(finalclust, columns = 2:5,
+aes(color= cluster))</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" />
+<em>By doing a Partitioning around Medoids, or PAM, method, I was able to see how well the clusters that I made could partition my data. The variables I wanted to visualize were Life Expectancy, Food Insecurity Rate, and Household Income across the counties. I also used Border Status to help visualize them through color. I chose the number of clusters using a graph of average silhouette widths as a function of cluster number. The graph indicated that the best number of clusters to use is two because two clusters had the highest average silhouette width at 0.5766 and is most parsimonious. This value indicates that I have found a reasonable structure for partitioning my data, although it’s not necessarily classified as strong.</em></p>
+<p><em>It is rather apparent when looking at the visualization plot of Food Insecurity Rate and Life Expectancy colored by cluster that the data points are mixed together instead of occupying a visibly distinct space for the given cluster. I then made a visualization of all the pairwise combinations of four of my variables from my “finalclust” dataset, including Life Expectancy, Rate of Frequent Mental Distress, Food Insecurity Rate, and Diabetic Rate, all colored by Border Status. The variables that had the greatest correlation were Food Insecurity Rate and Diabetic Rate at 0.503. This value is not a particularly strong positive correlation. I could also see that there was a negative correlation of -0.414 for Food Insecurity Rate and Life Expectancy. Many of the other variables did not show particularly strong correlations with one another, giving correlations of only +/- 0.1-0.2. It seems as though the clusters that were made were not that effective, as many of the data points remained mixed together. The Life Expectancy vs Food Insecurity Rate plot showed the most effective clustering, although it still didn’t give distinct regions.</em></p>
+</div>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
