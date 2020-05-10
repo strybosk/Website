@@ -22,6 +22,6 @@ We can then import our data using Python, with the use of the Pandas as a substi
 
 ```{python}
 import pandas
-heal
+healthdata = pandas.read_csv("joindata.csv")
 
 ```
