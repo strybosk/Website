@@ -1,5 +1,5 @@
 ---
-title: "Project1"
+title: "Project 1"
 author: "Kathleen Strybos"
 date: "2020-02-28"
 output:
@@ -14,7 +14,8 @@ R.options=list(max.print=100))
 
 ## Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties
 
-#Introduction
+## Introduction
+
 *The two datasets that were chosen for this project center around health across counties in Texas. The "health" dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website funded by the Robert Wood Johnson Foundation Program.*
 
 *The other dataset, called "mapmeal" was acquired through Feeding America. This dataset contains 4 variables, including county names in Texas, the food insecurity rate across the entire county's population, child food insecurity rate more specifically, and the average cost per meal in a county. These two datasets are interesting to me because I am going into the field of healthcare. I hope to become a pediatrician, so data centered around children's health, family dynamics and accessibility to resources is a point of interest for me, as it pertains to my future career. I expect to see that there is an association between child food insecurity rate and the percentage of children in a county on free and reduced lunch. The underlying variable within this situation likely has to do with household income as well. Many of the variables in these datasets pertain to socioeconomic status within the counties, and I expect to see associations that are typical for certain socioeconomic statuses.*
