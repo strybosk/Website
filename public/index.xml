@@ -17,7 +17,8 @@
       <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/blog/using-both-r-and-python-to-manipulate-data/</guid>
-      <description>Why learn how to use multiple coding languages? First of all, they offer unique benefits of their own. For instance, R is popular for statistical analysis and for creating great visualizations of data. Python is a more general language for data science and has a large user base, making it easy to get help within the community, although the R community is vast as well.</description>
+      <description>Why learn how to use multiple coding languages? First of all, they offer unique benefits of their own. For instance, R is popular for statistical analysis and for creating great visualizations of data. Python is a more general language for data science and has a large user base, making it easy to get help within the community, although the R community is vast as well.
+Sometimes you may want to bounce back and forth between the two when working on a project, and it is easy to work with both of the languages simultaneously using the reticulate package in R.</description>
     </item>
     
     <item>
@@ -26,18 +27,16 @@
       <pubDate>Mon, 20 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/project2/</guid>
-      <description>###Project 2: Modeling, Testing and Predicting on Data for Food Insecurity in Texas Counties
-#Introduction
-The dataset that was chosen for this project is centered around health across counties in Texas. The dataset contains 12 different variables for different health measures across counties in Texas. A few of these variables include average life expectancy, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, average household incomes, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border.</description>
+      <description>Project 2: Modeling, Testing and Predicting on Data for Food Insecurity in Texas Counties  Introduction The dataset that was chosen for this project is centered around health across counties in Texas. The dataset contains 12 different variables for different health measures across counties in Texas. A few of these variables include average life expectancy, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, average household incomes, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border.</description>
     </item>
     
     <item>
-      <title>Project1</title>
+      <title>Project 1</title>
       <link>/project1/</link>
       <pubDate>Fri, 28 Feb 2020 00:00:00 +0000</pubDate>
       
       <guid>/project1/</guid>
-      <description>Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties #Introduction The two datasets that were chosen for this project center around health across counties in Texas. The “health” dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border.</description>
+      <description>Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties  Introduction The two datasets that were chosen for this project center around health across counties in Texas. The “health” dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border.</description>
     </item>
     
     <item>

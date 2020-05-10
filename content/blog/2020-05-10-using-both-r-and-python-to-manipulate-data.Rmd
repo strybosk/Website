@@ -13,15 +13,15 @@ Why learn how to use multiple coding languages? First of all, they offer unique 
 Sometimes you may want to bounce back and forth between the two when working on a project, and it is easy to work with both of the languages simultaneously using the reticulate package in R. 
 
 ```{r setup, include=FALSE}
-install.packages('reticulate')
-library(reticulate)
-use_python("/usr/local/bin/python")
+##install.packages('reticulate')
+##library(reticulate)
+##use_python("/usr/local/bin/python")
 ```
 
 We can then import our data using Python, with the use of the Pandas as a substitute for R's dplyr.
 
 ```{python}
-import pandas
-healthdata = pandas.read_csv("joindata.csv")
+##import pandas
+##healthdata = pandas.read_csv("joindata.csv")
 
 ```

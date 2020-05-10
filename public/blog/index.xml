@@ -17,7 +17,8 @@
       <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/blog/using-both-r-and-python-to-manipulate-data/</guid>
-      <description>Why learn how to use multiple coding languages? First of all, they offer unique benefits of their own. For instance, R is popular for statistical analysis and for creating great visualizations of data. Python is a more general language for data science and has a large user base, making it easy to get help within the community, although the R community is vast as well.</description>
+      <description>Why learn how to use multiple coding languages? First of all, they offer unique benefits of their own. For instance, R is popular for statistical analysis and for creating great visualizations of data. Python is a more general language for data science and has a large user base, making it easy to get help within the community, although the R community is vast as well.
+Sometimes you may want to bounce back and forth between the two when working on a project, and it is easy to work with both of the languages simultaneously using the reticulate package in R.</description>
     </item>
     
   </channel>

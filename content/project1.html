@@ -1,5 +1,5 @@
 ---
-title: "Project1"
+title: "Project 1"
 author: "Kathleen Strybos"
 date: "2020-02-28"
 output:
@@ -11,8 +11,10 @@ output:
 
 <div id="project-1-exploratory-data-analysis-food-insecurity-and-demographics-in-texas-counties" class="section level2">
 <h2>Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties</h2>
-<p>#Introduction
-<em>The two datasets that were chosen for this project center around health across counties in Texas. The “health” dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website funded by the Robert Wood Johnson Foundation Program.</em></p>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p><em>The two datasets that were chosen for this project center around health across counties in Texas. The “health” dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website funded by the Robert Wood Johnson Foundation Program.</em></p>
 <p><em>The other dataset, called “mapmeal” was acquired through Feeding America. This dataset contains 4 variables, including county names in Texas, the food insecurity rate across the entire county’s population, child food insecurity rate more specifically, and the average cost per meal in a county. These two datasets are interesting to me because I am going into the field of healthcare. I hope to become a pediatrician, so data centered around children’s health, family dynamics and accessibility to resources is a point of interest for me, as it pertains to my future career. I expect to see that there is an association between child food insecurity rate and the percentage of children in a county on free and reduced lunch. The underlying variable within this situation likely has to do with household income as well. Many of the variables in these datasets pertain to socioeconomic status within the counties, and I expect to see associations that are typical for certain socioeconomic statuses.</em></p>
 <pre class="r"><code>library(tidyverse)
 health= read.csv(&quot;health.csv&quot;)
@@ -113,7 +115,9 @@ mapmeal1 %&gt;% spread(key=&quot;food insecurity&quot;, value= &quot;percentage 
 ## # … with 244 more rows</code></pre>
 <p><em>For the tidying/untidying portion of this project, I decided to untidy the columns in the “health” dataset concerned with the rate of the adult population that is uninsured and the rate of the child population that is uninsured. I created a new dataset called “health1” to house these modifications. I used pivot_longer() to accomplish the untidying since my “health” data was already tidy. With this result, I could see both the adult and child uninsurance rates in one column for a particular county. For the “mapmeal” dataset, I decided to untidy the columns for child food insecurity rate and overall food insecurity rate using the pivot_longer() function, since my data was already tidy. I created a new dataset called “mapmeal1” to house these modifications. With this result, I could see both the overall population’s and children’s food insecurity rates for a particular county.</em></p>
 <p><em>To re-tidy my datasets, I used the spread() function. For the “health1” dataset, I filled in “uninsured” and “percentage uninsured” for key and value, respectively to re-tidy my data. For the “mapmeal1” I filled in “food insecurity” and “percentage food insecure” for key and value, respectively. This allowed me to re-tidy my data.</em></p>
-<p>#Joining/Merging</p>
+</div>
+<div id="joiningmerging" class="section level2">
+<h2>Joining/Merging</h2>
 <pre class="r"><code>joindata &lt;-health %&gt;% full_join(mapmeal, by=c(&quot;County&quot;= &quot;county&quot;))
 joindata %&gt;% glimpse()</code></pre>
 <pre><code>## Observations: 254
@@ -137,7 +141,9 @@ joindata %&gt;% glimpse()</code></pre>
 ## $ childfoodinsecurityrate    &lt;dbl&gt; 0.234, 0.184, 0.253, 0.263, 0.201, 0.203, …
 ## $ costpermeal                &lt;dbl&gt; 2.75, 2.94, 2.94, 2.95, 2.83, 3.06, 2.78, …</code></pre>
 <p><em>I chose to join my “health” and “mapmeal” datasets using a full join. By using a full join, I was able to keep all of my observations. Even though there are NAs where there are no observations, this was not due to the joining process. Because both datasets were joined on the basis of Texas counties, all of the data alligned really well, hence the reason a full join was the appropriate choice. The only NAs that are present in my data were there when I retrieved the data. The NA observations are not there because there was never any information retrieved for a particular variable in a given column. There were not any cases dropped. I know this because there were 254 rows in the “health” dataset, and there are 254 rows in the “joindata.” This means that there were not any cases dropped.</em></p>
-<p>#Wrangling</p>
+</div>
+<div id="wrangling" class="section level2">
+<h2>Wrangling</h2>
 <pre class="r"><code>#Using Core dplyr Functions
 smalljoindata&lt;-joindata %&gt;% mutate(foodcost_peryear= (costpermeal*3*365)) %&gt;%
 filter(lifeexpectancy &gt;80) %&gt;% 
@@ -206,7 +212,9 @@ summarize(median(diabeticrate))</code></pre>
 ## 4 Urban        Non-Border                         9</code></pre>
 <p><em>In order to provide a dataset that would serve for generating summary statistics, I used all six core dplyr functions to create a new dataset. I ended up with a dataset, “smalljoindata,” that is grouped by border status and contains all of the counties with life expectancies greater than 80, with columns based on the name of the county, average food cost per year in the county, average life expectancy, rate of uninsured adults in the population, the total average estimated food cost per year per household, average household income, border status of the county, urbanization status of urban or rural, and rate of diabetes in the population. In order to show my use of the summarize() function, I used summarize_all() to find how many NAs were in each column of my original “joindata” dataset. After using the six core dplyr functions, I computed summary statistics using summarize(). In order to be more efficient with space, I created a longer function containing six different summary statistics: mean, standard deviation, IQR, number of distinct counties, minimum, and correlation, all grouped by border status. I then made a few separate functions in which I grouped by both urbanization and border status or just urbanization.</em></p>
 <p><em>With this code, I found that the average life expectancy in border counties is about 2.4 years greater than in non-border counties. The standard deviation of the food cost per year is $364 in border counties as compared to $159 in non-border counties, meaning there are large fluctuations in food cost. The IQR of household income is a smaller range of $5,292 in border counties as opposed to $30,948 in non-border counties. On a more basic level, we can see that of this dataset that contains an average life expectancy of 80 or older, 10 of these counties are in border counties, and 18 are in non-border counties. The county with the lowest average household income is $29,761 in border counties and $41,746 in non-border counties. Moreover, in border counties, the median rate of uninsured adults is 33.5%, while in non-border counties it’s only 18.5%, which is nearly 2x less. Lastly, I found a very interesting correlation between average food cost per year and the rate of diabetes in the population. In border counties, there is a strong positive correlation of 0.704 between yearly food cost and the rate of diabetes, while in non-border counties there is a weaker, negative correlation of -0.3875. In the function in which I grouped max life expectancy by urbanization and border status, I, interestingly enough, found that the longest life expectancy was in a rural, border county, at 90.6 years. Using n_distinct(), I saw that 12 of the selected counties were rural, while 16 were urban. Lastly, I found that when I grouped by border status and urbanization that the median rate of diabetes was the same among rural border and rural non-border counties.</em></p>
-<p>#Visualizing</p>
+</div>
+<div id="visualizing" class="section level2">
+<h2>Visualizing</h2>
 <pre class="r"><code>#Correlation Heatmap
 matrixdata &lt;- joindata%&gt;% na.omit %&gt;% select_if(is.numeric)
 glimpse(cor(matrixdata))</code></pre>
@@ -264,7 +272,9 @@ labs(fill= &quot;Urbanization Status&quot;)</code></pre>
 <em>The Correlation Heatmap shows that there is an obvious correlation of 1 among each variable and itself. The rest of the table gives small boxes with a value for the correlation between the two given numeric variables at a given coordinate. I can see that there is a strong negative correlation between household income and the percentage of children in the county on free/reduced lunch. Moreover, there is also a strong negative correlation between household income across all races and child food insecurity rates. Looking at positive correlations, I can see that there is a positive correlation between the rate of uninsured adults and frequent mental distress. There is also a stronger correlation between the rate of uninsured adults and the percentage of children in the county on free/reduced lunch. I can also see, as predicted in my Introduction, that there is a positive correlation between child food insecurity rate and the percentage of children on free/reduced lunches.</em></p>
 <p><em>The Dot Plot shows the relationship between household income and the percentage of children on free/reduced lunch. As we can clearly see, there is a negative linear relationship between the two variables, such that as household income increases, the percentage of children on free/reduced lunch decreases. Furthermore, we can see that the slope of this relationship is even steeper for children in rural counties, showing that the percentage of children on free/reduced lunch drops off more steeply as household income increases, as compared to urban counties.</em></p>
 <p><em>The Bar Plot shows how the mean life expectancy differs based on border status and by urbanization status of counties. Interestingly enough, the data show that the life expectancy is actually slightly higher in counties that are classified as border communities and also slightly higher in border regions classified as “Urban”. This is the opposite result as many would think, as accessibility to healthcare is often harder to come by in border regions. Because there have not been any tests for the statistical significance of these differences, I cannot be sure that life expectancy among border and non-border counties differs significantly.</em></p>
-<p>#Dimensionality Reduction</p>
+</div>
+<div id="dimensionality-reduction" class="section level2">
+<h2>Dimensionality Reduction</h2>
 <pre class="r"><code>library(cluster)
 pam_data &lt;-joindata%&gt;% select(lifeexpectancy, foodinsecurerate, Household.Income)
 sil_width &lt;-vector()

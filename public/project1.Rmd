@@ -1,5 +1,5 @@
 ---
-title: "Project1"
+title: "Project 1"
 author: "Kathleen Strybos"
 date: "2020-02-28"
 output:
@@ -14,7 +14,8 @@ R.options=list(max.print=100))
 
 ## Project 1 Exploratory Data Analysis: Food Insecurity and Demographics in Texas Counties
 
-#Introduction
+## Introduction
+
 *The two datasets that were chosen for this project center around health across counties in Texas. The "health" dataset contains 15 different variables for different health measures across counties in Texas. These variables include the names of Texas counties, average life expectancy, the rate at which members of the population are in frequent mental distress, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, rates of the amount of uninsured adults and children, average household incomes across three races: white, black and hispanic, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website funded by the Robert Wood Johnson Foundation Program.*
 
 *The other dataset, called "mapmeal" was acquired through Feeding America. This dataset contains 4 variables, including county names in Texas, the food insecurity rate across the entire county's population, child food insecurity rate more specifically, and the average cost per meal in a county. These two datasets are interesting to me because I am going into the field of healthcare. I hope to become a pediatrician, so data centered around children's health, family dynamics and accessibility to resources is a point of interest for me, as it pertains to my future career. I expect to see that there is an association between child food insecurity rate and the percentage of children in a county on free and reduced lunch. The underlying variable within this situation likely has to do with household income as well. Many of the variables in these datasets pertain to socioeconomic status within the counties, and I expect to see associations that are typical for certain socioeconomic statuses.*
@@ -52,7 +53,7 @@ mapmeal1 %>% spread(key="food insecurity", value= "percentage food insecure")
 
 *To re-tidy my datasets, I used the spread() function. For the "health1" dataset, I filled in "uninsured" and "percentage uninsured" for key and value, respectively to re-tidy my data. For the "mapmeal1" I filled in "food insecurity" and "percentage food insecure" for key and value, respectively. This allowed me to re-tidy my data.*
 
-#Joining/Merging
+## Joining/Merging
 ``` {R}
 joindata <-health %>% full_join(mapmeal, by=c("County"= "county"))
 joindata %>% glimpse()
@@ -61,7 +62,7 @@ joindata %>% glimpse()
 *I chose to join my "health" and "mapmeal" datasets using a full join. By using a full join, I was able to keep all of my observations. Even though there are NAs where there are no observations, this was not due to the joining process. Because both datasets were joined on the basis of Texas counties, all of the data alligned really well, hence the reason a full join was the appropriate choice. The only NAs that are present in my data were there when I retrieved the data. The NA observations are not there because there was never any information retrieved for a particular variable in a given column. There were not any cases dropped. I know this because there were 254 rows in the "health" dataset, and there are 254 rows in the "joindata." This means that there were not any cases dropped.*
 
 
-#Wrangling
+## Wrangling
 ``` {R}
 
 #Using Core dplyr Functions
@@ -101,7 +102,7 @@ summarize(median(diabeticrate))
 
 *With this code, I found that the average life expectancy in border counties is about 2.4 years greater than in non-border counties. The standard deviation of the food cost per year is $364 in border counties as compared to $159 in non-border counties, meaning there are large fluctuations in food cost. The IQR of household income is a smaller range of $5,292 in border counties as opposed to $30,948 in non-border counties. On a more basic level, we can see that of this dataset that contains an average life expectancy of 80 or older, 10 of these counties are in border counties, and 18 are in non-border counties. The county with the lowest average household income is $29,761 in border counties and $41,746 in non-border counties. Moreover, in border counties, the median rate of uninsured adults is 33.5%, while in non-border counties it's only 18.5%, which is nearly 2x less. Lastly, I found a very interesting correlation between average food cost per year and the rate of diabetes in the population. In border counties, there is a strong positive correlation of 0.704 between yearly food cost and the rate of diabetes, while in non-border counties there is a weaker, negative correlation of -0.3875. In the function in which I grouped max life expectancy by urbanization and border status, I, interestingly enough, found that the longest life expectancy was in a rural, border county, at 90.6 years. Using n_distinct(), I saw that 12 of the selected counties were rural, while 16 were urban. Lastly, I found that when I grouped by border status and urbanization that the median rate of diabetes was the same among rural border and rural non-border counties.*
 
-#Visualizing
+## Visualizing
 ``` {R}
 #Correlation Heatmap
 matrixdata <- joindata%>% na.omit %>% select_if(is.numeric)
@@ -156,7 +157,7 @@ labs(fill= "Urbanization Status")
 *The Bar Plot shows how the mean life expectancy differs based on border status and by urbanization status of counties. Interestingly enough, the data show that the life expectancy is actually slightly higher in counties that are classified as border communities and also slightly higher in border regions classified as "Urban". This is the opposite result as many would think, as accessibility to healthcare is often harder to come by in border regions. Because there have not been any tests for the statistical significance of these differences, I cannot be sure that life expectancy among border and non-border counties differs significantly.*
 
 
-#Dimensionality Reduction
+## Dimensionality Reduction
 ``` {R}
 library(cluster)
 pam_data <-joindata%>% select(lifeexpectancy, foodinsecurerate, Household.Income)

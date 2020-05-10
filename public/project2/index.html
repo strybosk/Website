@@ -72,10 +72,15 @@
               
 
 
-<p>###Project 2: Modeling, Testing and Predicting on Data for Food Insecurity in Texas Counties</p>
-<p>#Introduction</p>
+<div id="project-2-modeling-testing-and-predicting-on-data-for-food-insecurity-in-texas-counties" class="section level3">
+<h3>Project 2: Modeling, Testing and Predicting on Data for Food Insecurity in Texas Counties</h3>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
 <p><em>The dataset that was chosen for this project is centered around health across counties in Texas. The dataset contains 12 different variables for different health measures across counties in Texas. A few of these variables include average life expectancy, the rate of diabetes prevalence, rates of both food insecurity across the county and the rate of limited food access in the counties, average household incomes, free/reduced lunch rates among school-aged children, urbanization status indicators of whether the counties are rural or urban, and the border status of the counties, which indicates whether or not they are on the border. This data was acquired at the County Health Rankings and Roadmaps website and funded by the Robert Wood Johnson Foundation Program. Overall there are 254 observations, to signify how many counties there are in Texas.</em></p>
-<p>#MANOVA</p>
+</div>
+<div id="manova" class="section level1">
+<h1>MANOVA</h1>
 <pre class="r"><code>library(tidyverse)
 library(dplyr)
 library(ggplot2)
@@ -257,7 +262,9 @@ t.test(data=joindata, costpermeal~urbanization)</code></pre>
 ## mean in group Rural mean in group Urban 
 ##            2.851279            2.898415</code></pre>
 <p><em>The null hypothesis of this randomization test is that the mean cost per meal is the same for urban and rural counties. The alternative hypothesis is that the mean cost per meal is not the same for urban and rural counties. The two tailed p-value of the randomization test came out to be 0.0754, which is not significant in comparison to a reference of 0.05. Moreover, when a Two Sample t-test was done, the p-value was 0.07205, which is also not significant, indicating that the randomization test achieved similar results. We can then fail to reject the null hypothesis that the mean cost per meal is the same for urban and rural counties, due to a large p-value. The plot of the null distribution shows the red line at the positive and negative test statistics, which was 0.04713556. </em></p>
-<p>#Linear Regression</p>
+</div>
+<div id="linear-regression" class="section level2">
+<h2>Linear Regression</h2>
 <pre class="r"><code>#Linear Regression Model
 joindata$foodinsecurerate_c&lt;-joindata$foodinsecurerate-mean(joindata$foodinsecurerate, 
   na.rm=T)
@@ -335,7 +342,9 @@ summary(fit)$r.sq</code></pre>
 <p><em>The data meets the assumption of normality and homoskedasticity, and therefore linearity is also met through homoskedasticity. A Shapiro_Wilk Normality test was run, along with a histogram and QQ plot to check for normality, and all results confirmed normality of the data. The null hypothesis for homoskedasticity fails to be rejected after running the Breusch-Pagan test, with a p-value of 0.1483, which is greater than 0.05.</em></p>
 <p><em>After redoing the regression using homoskedastic standard errors, significance was maintained for the effect of border status when the cost per meal is controlled for. The standard errors for border status decreased by about two-tenths from 0.8991 to 0.68115, and the standard error for cost per meal decreased from 2.3624 to 1.70938. The standard error for the interaction between border status and cost per meal decreased slightly from 2.8136 to 2.17218 with robust standard errors.</em></p>
 <p><em>The proportion of the variation in the outcome that the model explains, or the R-squared value, is 0.2246, or 22.46%.</em></p>
-<p>#Linear Regression with Bootstrapped Standard Errors</p>
+</div>
+<div id="linear-regression-with-bootstrapped-standard-errors" class="section level2">
+<h2>Linear Regression with Bootstrapped Standard Errors</h2>
 <pre class="r"><code>fit&lt;-lm(foodinsecurerate_c ~ costpermeal_c*border_status, data=joindata)
 summary(fit)</code></pre>
 <pre><code>## 
@@ -372,7 +381,9 @@ samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
 ##   costpermeal_c:border_statusNon-Border
 ## 1                              2.110855</code></pre>
 <p><em>The bootstrapped standard errors shows similar standard errors that were seen in the robust standard errors of the linear regression, however they are very different than the original standard errors from the linear regression. The bootstrapped SE for costpermeal_c is 1.673076, which is similar to the robust SE of 1.70938, but different from the original SE of 2.3624. Because the bootstrapped and robust SEs went down, this means the p-values got smaller as well. The bootstrapped SE for border status is 0.6910803, which is similar to the robust SE of 0.68115, and smaller than the original SE of 0.8991, meaning the p-value is smaller for the adjusted SEs. The bootstrapped SE for the interaction is 2.158202, which is similar to the robust SE of 2.17218, but smaller than the original SE of 2.8136, meaning the p-value is smaller for the adjusted SEs too.</em></p>
-<p>#Logistic Regression</p>
+</div>
+<div id="logistic-regression" class="section level2">
+<h2>Logistic Regression</h2>
 <pre class="r"><code>#Logistic Regression
 joindata_log&lt;- joindata%&gt;%mutate(Urb_binary=ifelse(urbanization==&quot;Urban&quot;,1,0))
 fit&lt;-glm(Urb_binary ~ limitedaccessfoodrate+Household.Income, data=joindata_log,
@@ -473,7 +484,9 @@ summarize_all(diags,mean,na.rm=TRUE)</code></pre>
 <p><em>The accuracy of the model was reported to be 0.743083, which means that true results of classification, either positive or negative are reported 74.31% of the time for the classification of a county as urban or rural. The sensitivity was reported to be 0.4146341, which means that the true positive rate of counties being identified as urban happened 41.46% of the time. The specificity was reported to be 0.9005848, meaning that the true negative rate of counties being identified as rural happened 90.06% of the time. The precision of the model was 0.6666667, meaning that this is the proportion of counties classified as urban that actually are urban in reality.</em></p>
 <p><em>The ROC curve above shows the tradeoff between sensitivity and specificity, and the AUC is a reflection of the summarization of those values. We can see that as the true positive rate increases, the false positive rate increases as well. The calculation of the AUC from the ROC plot gave a value of 0.7925403, which falls within the “fair” range for how well the model of the rate of limited access to food and household income predicts the data of urbanization classification.</em></p>
 <p><em>A 10-fold cross validation was done, and the average out-of-sample accuracy was reported to be 0.7274744, which means that true results, either positive or negative are reported 72.75% of the time for the classification of a county as urban or rural. The sensitivity was reported to be 0.4075536, which means that the true positive rate of counties being identified as urban happened only 40.76% of the time. The specificty was reported to be 0.8796805, which means that correct identification of rural counties happened 87.97% of the time. The PPV was reported to be 0.6665476, meaning that this is the proportion of counties classified as urban that actually are urban in reality. The AUC of the model is 0.7722236, which falls in the classification of “fair” for how well the model predicts the data.</em></p>
-<p>#LASSO and CV</p>
+</div>
+<div id="lasso-and-cv" class="section level2">
+<h2>LASSO and CV</h2>
 <pre class="r"><code>library(glmnet)
 joindata_nona&lt;-joindata_log%&gt;%drop_na()%&gt;%select(-c(County, 
   foodinsecurerate_c, costpermeal_c, urbanization))
@@ -536,6 +549,7 @@ diags%&gt;%summarize_all(mean)</code></pre>
 <pre><code>##         acc      sens      spec      ppv       auc
 ## 1 0.8179348 0.6327922 0.9250668 0.825873 0.8799389</code></pre>
 <p><em>The LASSO regression retained Household Income and Rate of Uninsured Children as the variables that were the best predictors for Urban classification. The 10-fold CV performed on the binary Urban classification variable gave an out-of-sample accuracy of 0.8269928, which is greater than the out-of-sample accuracy in the logisitic regression, which was 0.7274744. The AUC from the 10-fold CV for the LASSO was 0.874748 which is really good, as opposed to an AUC of 0.7722236 for the logistic regression, which is fair. This means that the LASSO regression performs better than a logisitic regression at predicting true results, either positive or negative for the classification of a county as urban or rural, by reducing overfitting of the model.</em></p>
+</div>
 </div>
 
               <hr>
