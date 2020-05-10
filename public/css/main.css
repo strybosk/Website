@@ -96,6 +96,12 @@ html, body {
 .container a:hover {
   color: #960f3a;
 }
+
+.img-circle {
+  border: solid 10px;
+  border-color: #cf405d;
+}
+
 .container p img, .img-responsive {
   display: block;
   height: auto;
