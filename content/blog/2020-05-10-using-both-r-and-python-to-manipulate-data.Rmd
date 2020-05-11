@@ -8,20 +8,32 @@ tags: []
 description: ''
 ---
 
-Why learn how to use multiple coding languages? First of all, they offer unique benefits of their own. For instance, R is popular for statistical analysis and for creating great visualizations of data. Python is a more general language for data science and has a large user base, making it easy to get help within the community, although the R community is vast as well.
+Why learn how to use multiple coding lan![](/blog/2020-05-10-using-both-r-and-python-to-manipulate-data_files/pythonrimage.png)guages? First of all, they offer unique benefits of their own. For instance, R is popular for statistical analysis and for creating great visualizations of data. Python is a more general language for data science and has a large user base, making it easy to get help within the community, although the R community is vast as well.
 
-Sometimes you may want to bounce back and forth between the two when working on a project, and it is easy to work with both of the languages simultaneously using the reticulate package in R. 
+Sometimes you may want to bounce back and forth between the two when working on a project, and it is easy to work with both of the languages simultaneously using the reticulate package in R. By using this package, you are incorporating bits of each language at once.
 
-```{r setup, include=FALSE}
-##install.packages('reticulate')
-##library(reticulate)
-##use_python("/usr/local/bin/python")
+```{r}
+library(reticulate)
 ```
 
-We can then import our data using Python, with the use of the Pandas as a substitute for R's dplyr.
+We can then import our data using Python, with the use of the Pandas as a substitute for R's dplyr. We can use the filter function to select which variables we want to include in a modified table and can use the sort_values() function to arrange the observations by increasing life expectancy.
 
 ```{python}
-##import pandas
-##healthdata = pandas.read_csv("joindata.csv")
+import pandas
+joindata = pandas.read_csv("~/Desktop/Website/content/joindata.csv")
+joindatamod=(joindata.filter(['border_status','lifeexpectancy', 'uninsuredchildrenrate'])
+  .sort_values(by=('lifeexpectancy')))
+  
+joindatamod
+
 
 ```
+
+If we want to see how our modified dataset from Python can play with R functions, we can make a plot using that data with the ggplot function. The geom_point() function helps us see if we can eyeball any trends in the data. 
+
+```{r}
+library(ggplot2)
+ggplot(py$joindatamod, aes(x=uninsuredchildrenrate, lifeexpectancy, color=border_status))+geom_point()+ggtitle("Life Expectancy by Rate of Uninsured Children")
+```
+
+As you can see, the data modifications made in Python played nicely with the functions in R. This way, we can use Python code without losing the benefits of ggplot, as we can use both simulatenously.
