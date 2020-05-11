@@ -31,7 +31,7 @@ joindatamod=(joindata.filter(['border_status','lifeexpectancy', 'uninsuredchildr
 joindatamod
 ```
 
-If we want to see how our modified dataset from Python can play with R functions, we can make a plot using that data with the ggplot function. The geom_point() function helps us see if we can eyeball any trends in the data. 
+If we want to see how our modified dataset from Python can play with R functions, we can make a plot using that data with the ggplot function. If we place "py$" in front of the name of the dataset we created in Python, it will be ready for use in R. The geom_point() function helps us see if we can eyeball any trends in the data. 
 
 ```{r}
 library(ggplot2)

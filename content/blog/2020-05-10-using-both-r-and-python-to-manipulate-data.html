@@ -87,7 +87,7 @@ joindatamod</code></pre>
 ## 121        Border            90.6                     19
 ## 
 ## [237 rows x 3 columns]</code></pre>
-<p>If we want to see how our modified dataset from Python can play with R functions, we can make a plot using that data with the ggplot function. The geom_point() function helps us see if we can eyeball any trends in the data.</p>
+<p>If we want to see how our modified dataset from Python can play with R functions, we can make a plot using that data with the ggplot function. If we place “py$” in front of the name of the dataset we created in Python, it will be ready for use in R. The geom_point() function helps us see if we can eyeball any trends in the data.</p>
 <pre class="r"><code>library(ggplot2)
 ggplot(py$joindatamod, aes(x=uninsuredchildrenrate, lifeexpectancy, color=border_status))+geom_point()+ggtitle(&quot;Life Expectancy by Rate of Uninsured Children&quot;)</code></pre>
 <p><img src="/blog/2020-05-10-using-both-r-and-python-to-manipulate-data_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
