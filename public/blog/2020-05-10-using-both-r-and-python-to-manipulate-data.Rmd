@@ -21,7 +21,7 @@ Sometimes you may want to bounce back and forth between the two when working on 
 library(reticulate)
 ```
 
-We can then import our data using Python, with the use of the Pandas as a substitute for R's dplyr. We can use the filter function to select which variables we want to include in a modified table and can use the sort_values() function to arrange the observations by increasing life expectancy.
+We can then import our data using Python, with the use of the Pandas package as a substitute for R's dplyr. We can use the filter function to select which variables we want to include in a modified table and can use the sort_values() function to arrange the observations by increasing life expectancy.
 
 ```{python}
 import pandas

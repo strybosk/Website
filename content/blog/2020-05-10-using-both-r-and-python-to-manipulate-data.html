@@ -17,7 +17,7 @@ categories: []
 <p><img src="/blog/2020-05-10-using-both-r-and-python-to-manipulate-data_files/pythonrimage.png" style="width:50.0%;height:50.0%" /></p>
 <p>Sometimes you may want to bounce back and forth between the two when working on a project, and it is easy to work with both of the languages simultaneously using the reticulate package in R. By using this package, you are incorporating bits of each language at once.</p>
 <pre class="r"><code>library(reticulate)</code></pre>
-<p>We can then import our data using Python, with the use of the Pandas as a substitute for R’s dplyr. We can use the filter function to select which variables we want to include in a modified table and can use the sort_values() function to arrange the observations by increasing life expectancy.</p>
+<p>We can then import our data using Python, with the use of the Pandas package as a substitute for R’s dplyr. We can use the filter function to select which variables we want to include in a modified table and can use the sort_values() function to arrange the observations by increasing life expectancy.</p>
 <pre class="python"><code>import pandas
 joindata = pandas.read_csv(&quot;~/Desktop/Website/content/joindata.csv&quot;)
 joindatamod=(joindata.filter([&#39;border_status&#39;,&#39;lifeexpectancy&#39;, &#39;uninsuredchildrenrate&#39;])
